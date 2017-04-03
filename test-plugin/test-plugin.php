@@ -11,25 +11,29 @@
 if (!defined('ABSPATH')) die('indirect access');
 
 
+require_once 'BasePlugin.php';
 
-class TestPlugin
+
+
+class TestPlugin extends BasePlugin
 {
-	public static function load_plugin()
-	{
-		add_action('init', array('TestPlugin', 'wordpress_init'));
-		add_filter('post_type_link', array('TestPlugin', 'rewrite_test_post_url'), 10, 3);
-		add_action('pre_get_posts', array('TestPlugin', 'add_test_post_to_pages'));
+	public $plugin_name = 'test-plugin';
 
+	public function load_hooks()
+	{
+		add_filter('post_type_link', array($this, 'rewrite_test_post_url'), 10, 3);
+		add_action('pre_get_posts', array($this, 'add_test_post_to_pages'));
+		add_filter('template_include', array($this, 'template_include_controller'));
 	}
 
-	public static function wordpress_init()
+	public function wordpress_init()
 	{
 		error_log('Test Plugin wordpress_init');
 
-		TestPlugin::register_test_post_type();
+		$this->register_test_post_type();
 	}
 
-	public static function register_test_post_type()
+	public function register_test_post_type()
 	{
 		register_post_type('test_plugin_post', array(
 			'labels' => array(
@@ -63,8 +67,19 @@ class TestPlugin
 		));
 	}
 
+	public function template_include_controller($template)
+	{
+		global $post;
+		error_log("debug template_include_controller: " . $post->post_type);
+		if ($post->post_type === 'test_plugin_post')
+			return $this->plugin_dir() . '/twig-template.php';
+		else
+			return $template;
+	}
+
 	// taken and modified from https://wordpress.stackexchange.com/questions/203951/remove-slug-from-custom-post-type-post-urls
-	function rewrite_test_post_url($post_link, $post, $leavename) {
+	public function rewrite_test_post_url($post_link, $post, $leavename)
+	{
 		if ('test_plugin_post' != $post->post_type || 'publish' != $post->post_status)
 			return $post_link;
 
@@ -74,7 +89,8 @@ class TestPlugin
 	}
 
 	// taken and modified from https://wordpress.stackexchange.com/questions/203951/remove-slug-from-custom-post-type-post-urls
-	function add_test_post_to_pages($query) {
+	public function add_test_post_to_pages($query)
+	{
 		// || 2 != count($query->query) || !isset($query->query['page'])
 		if (!$query->is_main_query())
 			return;
@@ -82,11 +98,11 @@ class TestPlugin
 		// if (!empty( $query->query['name']))
 			$query->set('post_type', array('post', 'test_plugin_post', 'page'));
 	}
+}
 
 
-
-
-TestPlugin::load_plugin();
+$plugin = new TestPlugin();
+$plugin->load_plugin();
 
 
 
