@@ -27,18 +27,29 @@ class TestPlugin extends BasePlugin
 		add_filter('template_include', array($this, 'template_include_controller'));
 	}
 
-	public function wordpress_activate()
-	{
-		error_log('Test Plugin wordpress_activate');
-		
-		$this->update_synthetic_pages();
-	}
+	// public function wordpress_activate()
+	// {
+	// 	error_log('Test Plugin wordpress_activate');
+
+	// 	// $this->update_synthetic_pages();
+	// }
 
 	public function wordpress_init()
 	{
 		error_log('Test Plugin wordpress_init');
 
 		$this->register_test_post_type();
+		$this->register_synthetic_pages(array(
+			'synth-1' => array(),
+			'synth-2' => array(),
+		));
+	}
+
+	public function wordpress_loaded()
+	{
+		error_log('Test Plugin wordpress_loaded');
+
+		$this->update_synthetic_pages();
 	}
 
 	public function register_test_post_type()
@@ -107,7 +118,7 @@ class TestPlugin extends BasePlugin
 			$query->set('post_type', array('post', 'test_plugin_post', 'page'));
 	}
 
-	public function register_synthetic_pages($owner_plugin, $pages)
+	public function register_synthetic_pages($pages)
 	{
 		foreach ($pages as $location => $page)
 		{
@@ -123,6 +134,7 @@ class TestPlugin extends BasePlugin
 		$existing_pages = $this->list_synthetic_pages();
 
 		$existing_page_map = array();
+		$unnecessary_pages = array();
 		foreach ($existing_pages as $page)
 		{
 			$location = $page->post_name;
@@ -130,19 +142,54 @@ class TestPlugin extends BasePlugin
 
 			if (isset($this->registered_synthetic_pages[$location]))
 			{
+				// error_log("page $location belongs here");
 				$existing_page_map[$location] = true;
-				error_log("page $location belongs here");
 			}
 			else
 			{
-				error_log("page $location doesnt belong");
+				// error_log("page $location doesnt belong");
+				$unnecessary_pages[] = $page;
 			}
 		}
 
+		$missing_pages = array();
 		foreach ($this->registered_synthetic_pages as $location => $page)
 		{
 			if (!isset($existing_page_map[$location]))
+			{
 				error_log("missing registered page $location");
+				$missing_pages[] = $location;
+			}
+		}
+
+		if (!empty($unnecessary_pages))
+			$this->delete_synthetic_pages($unnecessary_pages);
+		if (!empty($missing_pages))
+			$this->create_synthetic_pages($missing_pages);
+	}
+
+	public function delete_synthetic_pages($pages)
+	{
+		foreach ($pages as $page)
+		{
+			error_log("deleting synthetic page $page->post_name");
+			wp_delete_post($page->ID, false);
+		}
+	}
+
+	public function create_synthetic_pages($locations)
+	{
+		foreach ($locations as $location)
+		{
+			error_log("creating synthetic page $location");
+			wp_insert_post(array(
+				'post_type' => 'test_plugin_post',
+				'post_title' => $location,
+				'post_name' => $location,
+				'comment_status' => 'closed',
+				'post_status' => 'publish',
+				'post_parent' => $parent_id,
+			));
 		}
 	}
 
