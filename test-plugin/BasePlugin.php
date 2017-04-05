@@ -14,8 +14,13 @@ class BasePlugin
 
 	public function load_base_hooks()
 	{
+		register_activation_hook(plugin_basename($this->plugin_dir('/' . $this->plugin_name . '.php')), array($this, 'wordpress_activate'));
 		add_action('init', array($this, 'wordpress_init'));
 	}
+
+	// overridable
+	public function wordpress_activate()
+	{}
 
 	// overridable
 	public function wordpress_init()

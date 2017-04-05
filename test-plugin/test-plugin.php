@@ -18,12 +18,18 @@ require_once 'BasePlugin.php';
 class TestPlugin extends BasePlugin
 {
 	public $plugin_name = 'test-plugin';
+	public $registered_synthetic_pages = array();
 
 	public function load_hooks()
 	{
 		add_filter('post_type_link', array($this, 'rewrite_test_post_url'), 10, 3);
 		add_action('pre_get_posts', array($this, 'add_test_post_to_pages'));
 		add_filter('template_include', array($this, 'template_include_controller'));
+	}
+
+	public function wordpress_activate()
+	{
+		$this->update_synthetic_pages();
 	}
 
 	public function wordpress_init()
@@ -97,6 +103,55 @@ class TestPlugin extends BasePlugin
 
 		// if (!empty( $query->query['name']))
 			$query->set('post_type', array('post', 'test_plugin_post', 'page'));
+	}
+
+	public function register_synthetic_pages($owner_plugin, $pages)
+	{
+		foreach ($pages as $location => $page)
+		{
+			if (isset($this->registered_synthetic_pages[$location]))
+				throw new Exception("synthetic page '$location' is registered twice");
+			$this->registered_synthetic_pages[$location] = $page;
+		}
+	}
+
+	public function update_synthetic_pages()
+	{
+		error_log("updating synthetic pages");
+		$existing_pages = $this->list_synthetic_pages();
+
+		$existing_page_map = array();
+		foreach ($existing_pages as $page)
+		{
+			$location = $page->post_slug;
+			error_log("found page '$location'");
+
+			if (isset($this->registered_synthetic_pages[$location]))
+			{
+				$existing_page_map[$location] = true;
+				error_log("page $location belongs here");
+			}
+			else
+			{
+				error_log("page $location doesnt belong");
+			}
+		}
+
+		foreach ($this->registered_synthetic_pages as $location => $page)
+		{
+			if (!isset($existing_page_map[$location]))
+				error_log("missing registered page $location");
+		}
+	}
+
+	public function list_synthetic_pages()
+	{
+		$query = WP_Query(array(
+			'post_type' => 'test_plugin_post',
+			'posts_per_page' => -1,
+		));
+
+		return $query->posts;
 	}
 }
 
