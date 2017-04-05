@@ -29,6 +29,8 @@ class TestPlugin extends BasePlugin
 
 	public function wordpress_activate()
 	{
+		error_log('Test Plugin wordpress_activate');
+		
 		$this->update_synthetic_pages();
 	}
 
@@ -98,9 +100,9 @@ class TestPlugin extends BasePlugin
 	public function add_test_post_to_pages($query)
 	{
 		// || 2 != count($query->query) || !isset($query->query['page'])
-		if (!$query->is_main_query())
+		if (!$query->is_main_query() || !isset($query->query['page']))
 			return;
-
+		// error_log("debug isset(page): " . isset());
 		// if (!empty( $query->query['name']))
 			$query->set('post_type', array('post', 'test_plugin_post', 'page'));
 	}
@@ -123,7 +125,7 @@ class TestPlugin extends BasePlugin
 		$existing_page_map = array();
 		foreach ($existing_pages as $page)
 		{
-			$location = $page->post_slug;
+			$location = $page->post_name;
 			error_log("found page '$location'");
 
 			if (isset($this->registered_synthetic_pages[$location]))
@@ -146,7 +148,7 @@ class TestPlugin extends BasePlugin
 
 	public function list_synthetic_pages()
 	{
-		$query = WP_Query(array(
+		$query = new WP_Query(array(
 			'post_type' => 'test_plugin_post',
 			'posts_per_page' => -1,
 		));
