@@ -27,7 +27,7 @@ get_log:
 
 tail_log:
 	ssh $(USER):$(PASSWORD)@$(SSH_SERVER)
-		tail $(APACHE_LOG)
+		tail -n 40 $(APACHE_LOG)
 
 test:
 	sh

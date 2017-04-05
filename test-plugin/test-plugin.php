@@ -133,19 +133,12 @@ class TestPlugin extends BasePlugin
 		error_log("updating synthetic pages");
 		$existing_pages = $this->list_synthetic_pages();
 
-		$existing_page_map = array();
+		$existing_page_map = $this->map_existing_pages($existing_pages);
 		$unnecessary_pages = array();
-		foreach ($existing_pages as $page)
+		foreach ($existing_page_map as $location => $page)
 		{
-			$location = $page->post_name;
 			error_log("found page '$location'");
-
-			if (isset($this->registered_synthetic_pages[$location]))
-			{
-				// error_log("page $location belongs here");
-				$existing_page_map[$location] = true;
-			}
-			else
+			if (!isset($this->registered_synthetic_pages[$location]))
 			{
 				// error_log("page $location doesnt belong");
 				$unnecessary_pages[] = $page;
@@ -191,6 +184,46 @@ class TestPlugin extends BasePlugin
 				'post_parent' => $parent_id,
 			));
 		}
+	}
+
+	public function map_existing_pages($existing_pages)
+	{
+		$existing_page_map = array();
+		foreach ($existing_pages as $page)
+		{
+			// get the page location from the slug
+			$location = $page->post_name;
+
+			// if the page has a parent chain, we need to look up the chain for the full location path
+			if ($page->post_parent !== 0)
+			{
+				// error_log("page $location has a parent, looking for it");
+				$current_page = $page;
+				while ($current_page->post_parent !== 0)
+				{
+					$parent_page = null;
+					foreach ($existing_pages as $page_iter)
+						if ($page_iter->ID === $current_page->post_parent)
+							$parent_page = $page_iter;
+					if ($parent_page === null)
+					{
+						error_log("missing parent for page $current_page->post_name");
+						break;
+					}
+					else
+					{
+						// error_log("found $location parent, $parent_page->post_name");
+						$current_page = $parent_page;
+						$location = $parent_page->post_name . '/' . $location;
+					}
+				}
+			}
+
+			// map the page
+			$existing_page_map[$location] = $page;
+		}
+
+		return $existing_page_map;
 	}
 
 	public function list_synthetic_pages()
