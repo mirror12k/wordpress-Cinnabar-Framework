@@ -29,6 +29,7 @@ class TestPlugin extends BasePlugin
 		// add_action('parse_query', array($this, 'parse_query_hook'));
 		// add_action('pre_get_posts', array($this, 'add_test_post_to_pages'));
 		add_filter('template_include', array($this, 'template_include_controller'));
+		add_filter('rewrite_rules_array', array($this, 'wordpress_rewrite_rules_array'));
 	}
 
 	// public function wordpress_activate()
@@ -44,7 +45,7 @@ class TestPlugin extends BasePlugin
 
 		$this->register_test_post_type();
 		$this->register_synthetic_pages(array(
-			'synth-1' => array(),
+			'synth-1' => array( 'rewrite_rules' => array('doge-\d+/?$' => 'index.php?test_plugin_post={{path}}') ),
 			'synth-2' => array(),
 			'synth-2/test-child' => array(),
 		));
@@ -56,6 +57,7 @@ class TestPlugin extends BasePlugin
 
 		$this->fill_out_parent_pages();
 		$this->update_synthetic_pages();
+		$this->update_rewrite_rules();
 	}
 
 	public function register_test_post_type()
@@ -90,6 +92,56 @@ class TestPlugin extends BasePlugin
 			'rewrite' => array('slug' => false, 'with_front' => false),
 			'capability_type' => 'post'
 		));
+	}
+
+	public function wordpress_rewrite_rules_array($rules)
+	{
+		$newrules = array();
+		foreach ($this->registered_synthetic_pages as $location => $page)
+			$newrules += $this->render_rewrite_rules($page);
+
+		return $newrules + $rules;
+	}
+
+	public function update_rewrite_rules()
+	{
+		$rules = get_option('rewrite_rules');
+		foreach ($this->registered_synthetic_pages as $location => $page)
+			foreach ($this->render_rewrite_rules($page) as $src => $dst)
+			{
+				error_log("got rewrite_rule: $src => $dst");
+				if (!isset($rules[$src]) || $rules[$src] !== $dst)
+				{
+					error_log("flushing rewrite rules because of missing rule $src for $dst");
+
+					global $wp_rewrite;
+					$wp_rewrite->flush_rules();
+
+					return;
+				}
+			}
+	}
+
+	public function render_rewrite_rules($synthetic_page)
+	{
+		if (isset($synthetic_page['rewrite_rules']))
+		{
+			$rendered_rules = array();
+			foreach ($synthetic_page['rewrite_rules'] as $rule => $rewrite)
+				$rendered_rules[$this->render_rewrite_rule($synthetic_page, $rule)] = $this->render_rewrite_rule($synthetic_page, $rewrite);
+			return $rendered_rules;
+		}
+		else
+			return array();
+	}
+
+	public function render_rewrite_rule($synthetic_page, $rule)
+	{
+		$rule = str_replace('{{path}}', $synthetic_page['path'], $rule);
+		if (isset($synthetic_page['virtual_paths']))
+			foreach ($synthetic_page['virtual_paths'] as $name => $path)
+				$rule = str_replace("{{{$name}}}", $path, $rule);
+		return $rule;
 	}
 
 	public function template_include_controller($template)
@@ -165,6 +217,13 @@ class TestPlugin extends BasePlugin
 		{
 			if (isset($this->registered_synthetic_pages[$location]))
 				throw new Exception("synthetic page '$location' is registered twice");
+
+			$page['path'] = $location;
+			if (!isset($page['rewrite_rules']))
+				$page['rewrite_rules'] = array();
+			if (!isset($page['rewrite_rules']['{{path}}/?$']))
+				$page['rewrite_rules']['{{path}}/?$'] = 'index.php?test_plugin_post={{path}}';
+
 			$this->registered_synthetic_pages[$location] = $page;
 		}
 	}
@@ -204,14 +263,14 @@ class TestPlugin extends BasePlugin
 
 	public function update_synthetic_pages()
 	{
-		error_log("updating synthetic pages");
+		// error_log("updating synthetic pages");
 		$existing_pages = $this->list_synthetic_pages();
 
 		$existing_page_map = $this->map_existing_pages($existing_pages);
 		$unnecessary_pages = array();
 		foreach ($existing_page_map as $location => $page)
 		{
-			error_log("found page '$location'");
+			// error_log("found page '$location'");
 			if (!isset($this->registered_synthetic_pages[$location]))
 			{
 				// error_log("page $location doesnt belong");
