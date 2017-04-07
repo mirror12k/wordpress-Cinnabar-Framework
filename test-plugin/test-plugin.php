@@ -30,6 +30,7 @@ class TestPlugin extends BasePlugin
 		// add_action('pre_get_posts', array($this, 'add_test_post_to_pages'));
 		add_filter('template_include', array($this, 'template_include_controller'));
 		add_filter('rewrite_rules_array', array($this, 'wordpress_rewrite_rules_array'));
+		add_action('add_meta_boxes_synthetic_page', array($this, 'add_meta_boxes_synthetic_page'));
 	}
 
 	// public function wordpress_activate()
@@ -45,7 +46,7 @@ class TestPlugin extends BasePlugin
 
 		$this->register_test_post_type();
 		$this->register_synthetic_pages(array(
-			'synth-1' => array( 'rewrite_rules' => array('doge-\d+/?$' => 'index.php?test_plugin_post={{path}}') ),
+			'synth-1' => array( 'rewrite_rules' => array('doge-\d+/?$' => 'index.php?synthetic_page={{path}}') ),
 			'synth-2' => array(),
 			'synth-2/test-child' => array(),
 		));
@@ -62,24 +63,24 @@ class TestPlugin extends BasePlugin
 
 	public function register_test_post_type()
 	{
-		register_post_type('test_plugin_post', array(
+		register_post_type('synthetic_page', array(
 			'labels' => array(
-				'name' => __( 'Test Posts', 'test_plugin_post' ),
-				'singular_name' => __( 'Test Post', 'test_plugin_post' ),
-				'add_new' => __( 'Add New', 'test_plugin_post' ),
-				'add_new_item' => __( 'Add New Test Post', 'test_plugin_post' ),
-				'edit_item' => __( 'Edit Test Posts', 'test_plugin_post' ),
-				'new_item' => __( 'New Test Post', 'test_plugin_post' ),
-				'view_item' => __( 'View Test Post', 'test_plugin_post' ),
-				'search_items' => __( 'Search Test Posts', 'test_plugin_post' ),
-				'not_found' => __( 'No Test Posts found', 'test_plugin_post' ),
-				'not_found_in_trash' => __( 'No Test Posts found in Trash', 'test_plugin_post' ),
-				'parent_item_colon' => __( 'Parent Test Post:', 'test_plugin_post'),
-				'menu_name' => __( 'Test Posts', 'test_plugin_post' ),
+				'name' => __( 'Synthetic Pages', 'synthetic_page' ),
+				'singular_name' => __( 'Synthetic Page', 'synthetic_page' ),
+				'add_new' => __( 'Add New', 'synthetic_page' ),
+				'add_new_item' => __( 'Add New Synthetic Page', 'synthetic_page' ),
+				'edit_item' => __( 'Edit Synthetic Pages', 'synthetic_page' ),
+				'new_item' => __( 'New Synthetic Page', 'synthetic_page' ),
+				'view_item' => __( 'View Synthetic Page', 'synthetic_page' ),
+				'search_items' => __( 'Search Synthetic Pages', 'synthetic_page' ),
+				'not_found' => __( 'No Synthetic Pages found', 'synthetic_page' ),
+				'not_found_in_trash' => __( 'No Synthetic Pages found in Trash', 'synthetic_page' ),
+				'parent_item_colon' => __( 'Parent Synthetic Page:', 'synthetic_page'),
+				'menu_name' => __( 'Synthetic Pages', 'synthetic_page' ),
 			),
 			'hierarchical' => true,
-			'description' => __( 'Test Posts', 'test_plugin_post' ),
-			'supports' => array( 'title', 'editor', 'comments', 'page-attributes' ),
+			'description' => __( 'Synthetic Pages', 'synthetic_page' ),
+			'supports' => array( 'title', 'page-attributes' ),
 			'public' => true,
 			'show_ui' => true,
 			'show_in_menu' => true,
@@ -89,8 +90,8 @@ class TestPlugin extends BasePlugin
 			'has_archive' => true,
 			'query_var' => true,
 			'can_export' => true,
-			'rewrite' => array('slug' => false, 'with_front' => false),
-			'capability_type' => 'post'
+			'rewrite' => array('slug' => false),
+			'capability_type' => 'page'
 		));
 	}
 
@@ -109,7 +110,6 @@ class TestPlugin extends BasePlugin
 		foreach ($this->registered_synthetic_pages as $location => $page)
 			foreach ($this->render_rewrite_rules($page) as $src => $dst)
 			{
-				error_log("got rewrite_rule: $src => $dst");
 				if (!isset($rules[$src]) || $rules[$src] !== $dst)
 				{
 					error_log("flushing rewrite rules because of missing rule $src for $dst");
@@ -144,11 +144,54 @@ class TestPlugin extends BasePlugin
 		return $rule;
 	}
 
+
+	public function add_meta_boxes_synthetic_page($post)
+	{
+		add_meta_box(
+			'synthetic_page-config',
+			__( 'Synthetic Page Config', 'synthetic_page'),
+			array($this, 'render_synthetic_page_config_meta_box'),
+			'synthetic_page',
+			'normal',
+			'default'
+		);
+	}
+
+	public function render_synthetic_page_config_meta_box($page)
+	{
+		$page_location = $this->map_full_page_location($page);
+		$page_config = $this->registered_synthetic_pages[$page_location];
+		$rewrite_rules = $this->render_rewrite_rules($page_config);
+
+
+?>
+<table class="form-table">
+
+	<tr>
+		<th><label for="full_path" class="full_path_label"><?php echo htmlentities(__('Full Path', 'synthetic_page')); ?></label></th>
+		<td>
+			<input type="text" id="full_path" name="full_path" class="full_path_field" value="<?php echo htmlspecialchars($page_location) ?>">
+		</td>
+	</tr>
+	<tr>
+		<th><label for="rewrite_rules" class="rewrite_rules_label"><?php echo htmlentities(__('Rewrite Rules', 'synthetic_page')); ?></label></th>
+	</tr>
+	<?php foreach ($rewrite_rules as $src => $dst) { ?>
+	<tr>
+		<th><?php echo htmlentities($src); ?></th>
+		<td><?php echo htmlentities($dst) ?></td>
+	</tr>
+	<?php } ?>
+
+</table>
+<?php
+	}
+
 	public function template_include_controller($template)
 	{
 		global $post;
 		// error_log("debug template_include_controller: " . $post->post_type);
-		if ($post->post_type === 'test_plugin_post')
+		if ($post->post_type === 'synthetic_page')
 			return $this->plugin_dir() . '/twig-template.php';
 		else
 			return $template;
@@ -157,59 +200,13 @@ class TestPlugin extends BasePlugin
 	// taken and modified from https://wordpress.stackexchange.com/questions/203951/remove-slug-from-custom-post-type-post-urls
 	public function rewrite_test_post_url($post_link, $post, $leavename)
 	{
-		if ('test_plugin_post' != $post->post_type || 'publish' != $post->post_status)
+		if ('synthetic_page' != $post->post_type || 'publish' != $post->post_status)
 			return $post_link;
 
 		$post_link = str_replace( '/' . $post->post_type . '/', '/', $post_link );
 
 		return $post_link;
 	}
-
-	// public function do_parse_request_hook($b, $wp, $extra_query_vars)
-	// {
-	// 	global $wp_rewrite;
-	// 	$s = json_encode($wp_rewrite->wp_rewrite_rules());
-	// 	while (strlen($s) > 500)
-	// 	{
-	// 		error_log("debug wp_rewrite: " . substr($s, 0, 500));
-	// 		$s = substr($s, 500);
-	// 	}
-	// 	error_log("debug wp_rewrite: " . $s);
-
-	// 	error_log("debug do_parse_request_hook: " . json_encode($extra_query_vars));
-	// 	// $query->query_vars['post_type'] = array('post', 'test_plugin_post', 'page');
-	// 	return $b;
-	// }
-
-	// public function query_vars_hook($query)
-	// {
-	// 	error_log("debug query_vars_hook: " . json_encode($query));
-	// 	// $query->query_vars['post_type'] = array('post', 'test_plugin_post', 'page');
-	// 	return $query;
-	// }
-
-	// public function parse_request_hook($query)
-	// {
-	// 	error_log("debug parse_request_hook: " . json_encode($query->query_vars));
-	// 	// $query->query_vars['post_type'] = array('post', 'test_plugin_post', 'page');
-	// }
-
-	// public function parse_query_hook($query)
-	// {
-	// 	error_log("debug parse_query_hook: " . json_encode($query->query));
-	// }
-
-	// taken and modified from https://wordpress.stackexchange.com/questions/203951/remove-slug-from-custom-post-type-post-urls
-	// public function add_test_post_to_pages($query)
-	// {
-	// 	// || 2 != count($query->query) || !isset($query->query['page'])
-	// 	error_log("debug add_test_post_to_pages: " . json_encode($query->query));
-	// 	if (!$query->is_main_query() || !isset($query->query['page']))
-	// 	// 	return;
-	// 	// error_log("debug add_test_post_to_pages: " . $query->query['page']);
-	// 	// // if (!empty( $query->query['name']))
-	// 		$query->set('post_type', array('post', 'test_plugin_post', 'page'));
-	// }
 
 	public function register_synthetic_pages($pages)
 	{
@@ -222,7 +219,7 @@ class TestPlugin extends BasePlugin
 			if (!isset($page['rewrite_rules']))
 				$page['rewrite_rules'] = array();
 			if (!isset($page['rewrite_rules']['{{path}}/?$']))
-				$page['rewrite_rules']['{{path}}/?$'] = 'index.php?test_plugin_post={{path}}';
+				$page['rewrite_rules']['{{path}}/?$'] = 'index.php?synthetic_page={{path}}';
 
 			$this->registered_synthetic_pages[$location] = $page;
 		}
@@ -305,7 +302,7 @@ class TestPlugin extends BasePlugin
 
 	public static function get_synthetic_page_by_location($location)
 	{
-		$query = new WP_Query(array('post_type' => 'test_plugin_post', 'pagename' => $location));
+		$query = new WP_Query(array('post_type' => 'synthetic_page', 'pagename' => $location));
 		if ($query->have_posts())
 			return $query->posts[0];
 		else
@@ -336,7 +333,7 @@ class TestPlugin extends BasePlugin
 
 			error_log("creating synthetic page $location");
 			wp_insert_post(array(
-				'post_type' => 'test_plugin_post',
+				'post_type' => 'synthetic_page',
 				'post_title' => $page_name,
 				'post_name' => $page_name,
 				'comment_status' => 'closed',
@@ -355,11 +352,11 @@ class TestPlugin extends BasePlugin
 			$location = $page->post_name;
 
 			// if the page has a parent chain, we need to look up the chain for the full location path
-			if ($page->post_parent !== 0)
+			if ($page->post_parent)
 			{
 				// error_log("page $location has a parent, looking for it");
 				$current_page = $page;
-				while ($current_page->post_parent !== 0)
+				while ($current_page->post_parent)
 				{
 					$parent_page = null;
 					foreach ($existing_pages as $page_iter)
@@ -386,10 +383,54 @@ class TestPlugin extends BasePlugin
 		return $existing_page_map;
 	}
 
+	public function map_full_page_location($page)
+	{
+		// get the page location from the slug
+		$location = $page->post_name;
+
+		// if the page has a parent chain, we need to look up the chain for the full location path
+		if ($page->post_parent)
+		{
+			error_log("page $location has a parent: $page->post_parent, looking for it");
+			$current_page = $page;
+
+			while ($current_page->post_parent)
+			{
+				$parent_page = $this->get_synthetic_page_by_id($current_page->post_parent);
+				if ($parent_page === null)
+				{
+					error_log("missing parent for page $current_page->post_name");
+					break;
+				}
+				else
+				{
+					// error_log("found $location parent, $parent_page->post_name");
+					$current_page = $parent_page;
+					$location = $parent_page->post_name . '/' . $location;
+				}
+			}
+		}
+
+		return $location;
+	}
+
+	public function get_synthetic_page_by_id($id)
+	{
+		$query = new WP_Query(array(
+			'post_type' => 'synthetic_page',
+			'p' => $id,
+		));
+		if ($query->have_posts())
+			return $query->posts[0];
+		else
+			return null;
+	}
+
+
 	public function list_synthetic_pages()
 	{
 		$query = new WP_Query(array(
-			'post_type' => 'test_plugin_post',
+			'post_type' => 'synthetic_page',
 			'posts_per_page' => -1,
 		));
 

@@ -16,6 +16,8 @@ class BasePlugin
 	{
 		register_activation_hook(plugin_basename($this->plugin_dir('/' . $this->plugin_name . '.php')), array($this, 'wordpress_activate'));
 		add_action('init', array($this, 'wordpress_init'));
+		add_action('admin_init', array($this, 'wordpress_admin_init'));
+		add_action('admin_menu', array($this, 'wordpress_admin_menu'));
 		add_action('wp_loaded', array($this, 'wordpress_loaded'));
 	}
 
@@ -29,6 +31,14 @@ class BasePlugin
 
 	// overridable
 	public function wordpress_init()
+	{}
+
+	// overridable
+	public function wordpress_admin_init()
+	{}
+
+	// overridable
+	public function wordpress_admin_menu()
 	{}
 
 	// overridable
