@@ -20,17 +20,16 @@ class TestPlugin extends BasePlugin
 	public $plugin_name = 'test-plugin';
 	public $registered_synthetic_pages = array();
 
+	public $active_synthetic_page;
+
 	public function load_hooks()
 	{
 		add_filter('post_type_link', array($this, 'rewrite_test_post_url'), 10, 3);
-		// add_filter('do_parse_request', array($this, 'do_parse_request_hook'), 10, 3);
-		// add_filter('query_vars', array($this, 'query_vars_hook'), 10, 1);
-		// add_action('parse_request', array($this, 'parse_request_hook'));
-		// add_action('parse_query', array($this, 'parse_query_hook'));
-		// add_action('pre_get_posts', array($this, 'add_test_post_to_pages'));
+		add_action('template_redirect', array($this, 'template_redirect_controller'));
 		add_filter('template_include', array($this, 'template_include_controller'));
 		add_filter('rewrite_rules_array', array($this, 'wordpress_rewrite_rules_array'));
 		add_action('add_meta_boxes_synthetic_page', array($this, 'add_meta_boxes_synthetic_page'));
+		add_action('wp_enqueue_scripts', array('TFCLApp', 'wordpress_enqueue_scripts'));
 	}
 
 	// public function wordpress_activate()
@@ -93,6 +92,13 @@ class TestPlugin extends BasePlugin
 			'rewrite' => array('slug' => false),
 			'capability_type' => 'page'
 		));
+	}
+
+	public function wordpress_enqueue_scripts()
+	{
+		if (isset($this->active_synthetic_page) && isset($this->active_synthetic_page['scripts']))
+			foreach ($this->active_synthetic_page['scripts'] as $name => $script)
+				wp_enqueue_script('synthetic-page-js-include-' . $name, $this->plugin_url($script));
 	}
 
 	public function wordpress_rewrite_rules_array($rules)
@@ -187,11 +193,21 @@ class TestPlugin extends BasePlugin
 <?php
 	}
 
-	public function template_include_controller($template)
+	public function template_redirect_controller()
 	{
 		global $post;
-		// error_log("debug template_include_controller: " . $post->post_type);
+		// error_log("debug template_redirect_controller: " . $post->post_type);
 		if ($post->post_type === 'synthetic_page')
+		{
+			$location = $this->map_full_page_location($post);
+			$this->active_synthetic_page = $this->registered_synthetic_pages[$location];
+		}
+	}
+
+	public function template_include_controller($template)
+	{
+		// error_log("debug template_include_controller: " . $post->post_type);
+		if (isset($this->active_synthetic_page))
 			return $this->plugin_dir() . '/twig-template.php';
 		else
 			return $template;
@@ -391,7 +407,7 @@ class TestPlugin extends BasePlugin
 		// if the page has a parent chain, we need to look up the chain for the full location path
 		if ($page->post_parent)
 		{
-			error_log("page $location has a parent: $page->post_parent, looking for it");
+			// error_log("page $location has a parent: $page->post_parent, looking for it");
 			$current_page = $page;
 
 			while ($current_page->post_parent)
