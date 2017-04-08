@@ -2,17 +2,14 @@
 
 
 
-class SyntheticPageManager extends BasePluginMixin
+require_once 'ViewController.php';
+
+class SyntheticPageManager extends Cinnabar\BasePluginMixin
 {
 	public $registered_synthetic_pages = array();
 
 	public $active_synthetic_page;
 	public $active_view_controller;
-
-	public function register()
-	{
-		$this->register_synthetic_page_post_type();
-	}
 
 	public function load_hooks()
 	{
@@ -24,6 +21,11 @@ class SyntheticPageManager extends BasePluginMixin
 		add_action('wp_enqueue_scripts', array($this, 'wordpress_enqueue_scripts'));
 		// add_filter('wp_title', array($this, 'template_title_controller'), 10, 3);
 		add_filter('document_title_parts', array($this, 'template_title_controller'));
+	}
+
+	public function register()
+	{
+		$this->register_synthetic_page_post_type();
 	}
 
 	public function wordpress_loaded()
@@ -219,7 +221,7 @@ class SyntheticPageManager extends BasePluginMixin
 	{
 		// error_log("debug template_include_controller: " . $post->post_type);
 		if (isset($this->active_synthetic_page))
-			return $this->app->plugin_dir() . '/twig-template.php';
+			return $this->app->plugin_dir() . '/mixins/SyntheticPageManager/twig-template.php';
 		else
 			return $template;
 	}

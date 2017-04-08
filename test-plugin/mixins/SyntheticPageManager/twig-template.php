@@ -3,7 +3,6 @@
 get_header();
 
 global $test_plugin;
-require_once 'vendor/autoload.php';
 
 $loader = new Twig_Loader_Array(array(
     'index' => 'Hello {{ name }}!',
