@@ -45,7 +45,7 @@ class TestPlugin extends BasePlugin
 
 	public function template_title_controller($title)
 	{
-		error_log('debug template_title_controller: ' . json_encode($title));
+		// error_log('debug template_title_controller: ' . json_encode($title));
 		if (isset($this->active_synthetic_page))
 		{
 			if (isset($this->active_synthetic_page['title']))
@@ -73,6 +73,17 @@ class TestPlugin extends BasePlugin
 			),
 			'synth-2/test-child' => array(
 				'view_controller' => 'TestViewController',
+			),
+		));
+
+		$this->register_plugin_options(array(
+			'test-plugin-a1-settings' => array(
+				'title' => 'Test Plugin A section',
+				'fields' => array(
+					'test-plugin-a1-test-field' => array(
+						'label' => 'test plugin a test field',
+					),
+				),
 			),
 		));
 	}
