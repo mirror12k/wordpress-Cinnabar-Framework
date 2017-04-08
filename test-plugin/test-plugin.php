@@ -21,6 +21,7 @@ class TestPlugin extends BasePlugin
 	public $registered_synthetic_pages = array();
 
 	public $active_synthetic_page;
+	public $active_view_controller;
 
 	public function load_hooks()
 	{
@@ -201,6 +202,12 @@ class TestPlugin extends BasePlugin
 		{
 			$location = $this->map_full_page_location($post);
 			$this->active_synthetic_page = $this->registered_synthetic_pages[$location];
+			if (isset($this->active_synthetic_page['view_controller']))
+			{
+				$this->active_view_controller = new $this->active_synthetic_page['view_controller']($this, $this->active_synthetic_page);
+
+				$this->active_view_controller->template_redirect();
+			}
 		}
 	}
 
