@@ -10,8 +10,9 @@
 
 if (!defined('ABSPATH')) die('indirect access');
 
-
+require_once 'ViewController.php';
 require_once 'BasePlugin.php';
+require_once 'TestViewController.php';
 
 
 
@@ -30,7 +31,7 @@ class TestPlugin extends BasePlugin
 		add_filter('template_include', array($this, 'template_include_controller'));
 		add_filter('rewrite_rules_array', array($this, 'wordpress_rewrite_rules_array'));
 		add_action('add_meta_boxes_synthetic_page', array($this, 'add_meta_boxes_synthetic_page'));
-		add_action('wp_enqueue_scripts', array('TFCLApp', 'wordpress_enqueue_scripts'));
+		add_action('wp_enqueue_scripts', array($this, 'wordpress_enqueue_scripts'));
 	}
 
 	// public function wordpress_activate()
@@ -46,9 +47,15 @@ class TestPlugin extends BasePlugin
 
 		$this->register_test_post_type();
 		$this->register_synthetic_pages(array(
-			'synth-1' => array( 'rewrite_rules' => array('doge-\d+/?$' => 'index.php?synthetic_page={{path}}') ),
-			'synth-2' => array(),
-			'synth-2/test-child' => array(),
+			'synth-1' => array(
+				'rewrite_rules' => array('doge-\d+/?$' => 'index.php?synthetic_page={{path}}')
+			),
+			'synth-2' => array(
+				'view_controller' => 'TestViewController',
+			),
+			'synth-2/test-child' => array(
+				'view_controller' => 'TestViewController',
+			),
 		));
 	}
 
@@ -177,16 +184,24 @@ class TestPlugin extends BasePlugin
 		$page_config = $this->registered_synthetic_pages[$page_location];
 		$rewrite_rules = $this->render_rewrite_rules($page_config);
 
-
+		
 ?>
 <table class="form-table">
 
 	<tr>
 		<th><label for="full_path" class="full_path_label"><?php echo htmlentities(__('Full Path', 'synthetic_page')); ?></label></th>
 		<td>
-			<input type="text" id="full_path" name="full_path" class="full_path_field" value="<?php echo htmlspecialchars($page_location) ?>">
+			<?php echo htmlentities($page_location) ?>
 		</td>
 	</tr>
+	<?php if (isset($page_config['view_controller'])) { ?>
+	<tr>
+		<th><label for="view_controller" class="view_controller_label"><?php echo htmlentities(__('View Controller', 'synthetic_page')); ?></label></th>
+		<td>
+			<?php echo htmlentities($page_config['view_controller']) ?>
+		</td>
+	</tr>
+	<?php } ?>
 	<tr>
 		<th><label for="rewrite_rules" class="rewrite_rules_label"><?php echo htmlentities(__('Rewrite Rules', 'synthetic_page')); ?></label></th>
 	</tr>

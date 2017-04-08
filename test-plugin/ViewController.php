@@ -34,7 +34,7 @@ class ViewController
 		// used when no static title is specified in the synthetic page
 		// example:
 		// return "my awesome title";
-		return '';
+		return $this->page['path'];
 	}
 }
 
