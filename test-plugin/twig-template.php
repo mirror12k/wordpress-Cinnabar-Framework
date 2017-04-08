@@ -11,8 +11,8 @@ $loader = new Twig_Loader_Array(array(
 $twig = new Twig_Environment($loader);
 
 $template_args = array();
-if (isset($test_plugin->active_view_controller))
-	$template_args = array_merge($template_args, $test_plugin->active_view_controller->template_args());
+if (isset($test_plugin->mixins['SyntheticPageManager']->active_view_controller))
+	$template_args = array_merge($template_args, $test_plugin->mixins['SyntheticPageManager']->active_view_controller->template_args());
 
 
 echo $twig->render('index', $template_args);
