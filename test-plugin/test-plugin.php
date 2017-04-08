@@ -83,6 +83,10 @@ class TestPlugin extends BasePlugin
 					'test-plugin-a1-test-field' => array(
 						'label' => 'test plugin a test field',
 					),
+					'test-plugin-a1-test-bool' => array(
+						'label' => 'test plugin a test bool',
+						'option_type' => 'boolean',
+					),
 				),
 			),
 		));

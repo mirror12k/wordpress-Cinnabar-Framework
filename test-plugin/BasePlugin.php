@@ -5,6 +5,9 @@
 class BasePlugin
 {
 	// public $plugin_name = 'base-plugin';
+
+
+	// baseplugin functionality	
 	public $plugin_options = array();
 	public $default_plugin_options = array();
 
@@ -93,7 +96,11 @@ class BasePlugin
 	public function baseplugin_options_field($args)
 	{
 		$setting = $args['setting_name'];
-		echo "<input type='text' name='$setting' id='$setting' value='" . htmlentities(get_option($setting)) . "' />";
+		if (isset($args['setting_args']['option_type']) && $args['setting_args']['option_type'] === 'boolean')
+			echo "<input type='checkbox' name='$setting' id='$setting' value='1' " . (1 == get_option($setting) ? "checked='checked'" : "") . " />";
+		else
+			echo "<input type='text' name='$setting' id='$setting' value='" . htmlentities(get_option($setting)) . "' />";
+
 	}
 
 	public function baseplugin_action_links($links)
@@ -103,27 +110,22 @@ class BasePlugin
 		return $links;
 	}
 
-	// overridable
+	// overridable api
 	public function load_hooks()
 	{}
 
-	// overridable
 	public function wordpress_activate()
 	{}
 
-	// overridable
 	public function wordpress_init()
 	{}
 
-	// overridable
 	public function wordpress_admin_init()
 	{}
 
-	// overridable
 	public function wordpress_admin_menu()
 	{}
 
-	// overridable
 	public function wordpress_loaded()
 	{}
 
