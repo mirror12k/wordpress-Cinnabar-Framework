@@ -18,7 +18,7 @@ class ViewController
 	public function js_args()
 	{
 		// example:
-		// return array('my-specific-js' => array('key' => 'value'));
+		// return array('my-specific-js' => array('variable' => 'my_specific_args', 'args' => array('key' => 'value')));
 		return array();
 	}
 

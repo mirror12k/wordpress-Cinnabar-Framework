@@ -98,8 +98,15 @@ class TestPlugin extends BasePlugin
 	public function wordpress_enqueue_scripts()
 	{
 		if (isset($this->active_synthetic_page) && isset($this->active_synthetic_page['scripts']))
-			foreach ($this->active_synthetic_page['scripts'] as $name => $script)
-				wp_enqueue_script('synthetic-page-js-include-' . $name, $this->plugin_url($script));
+		{
+			foreach ($this->active_synthetic_page['scripts'] as $script_name => $script)
+				wp_enqueue_script('synthetic-page-js-include-' . $script_name, $this->plugin_url($script));
+			if (isset($this->active_view_controller))
+			{
+				foreach ($this->active_view_controller->js_args() as $script_name => $args)
+					wp_localize_script('synthetic-page-js-include-' . $script_name, $args['variable'], $args['args']);
+			}
+		}
 	}
 
 	public function wordpress_rewrite_rules_array($rules)
@@ -461,9 +468,9 @@ class TestPlugin extends BasePlugin
 	}
 }
 
-
-$plugin = new TestPlugin();
-$plugin->load_plugin();
+global $test_plugin;
+$test_plugin = new TestPlugin();
+$test_plugin->load_plugin();
 
 
 

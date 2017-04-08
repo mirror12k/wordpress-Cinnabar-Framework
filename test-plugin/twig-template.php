@@ -2,7 +2,7 @@
 <?php
 get_header();
 
-
+global $test_plugin;
 require_once 'vendor/autoload.php';
 
 $loader = new Twig_Loader_Array(array(
@@ -10,7 +10,11 @@ $loader = new Twig_Loader_Array(array(
 ));
 $twig = new Twig_Environment($loader);
 
-echo $twig->render('index', array('name' => 'User'));
+$template_args = array();
+if (isset($test_plugin->active_view_controller))
+	$template_args = array_merge($template_args, $test_plugin->active_view_controller->template_args());
+
+echo $twig->render('index', $template_args);
 
 
 get_footer();
