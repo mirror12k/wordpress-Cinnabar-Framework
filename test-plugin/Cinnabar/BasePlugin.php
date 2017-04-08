@@ -34,10 +34,10 @@ class BasePlugin
 	{
 		$mixin_classes = $this->mixins;
 		$this->mixins = array();
-		foreach ($mixin_classes as $mixin_class)
+		foreach ($mixin_classes as $mixin_name => $mixin_class)
 		{
-			$this->mixins[$mixin_class] = new $mixin_class($this);
-			$this->$mixin_class = $this->mixins[$mixin_class];
+			$this->mixins[$mixin_name] = new $mixin_class($this);
+			$this->$mixin_name = $this->mixins[$mixin_name];
 		}
 	}
 

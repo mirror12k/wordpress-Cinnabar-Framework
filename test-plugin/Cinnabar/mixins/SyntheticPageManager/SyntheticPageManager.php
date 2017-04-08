@@ -2,9 +2,11 @@
 
 
 
+namespace Cinnabar;
+
 require_once 'ViewController.php';
 
-class SyntheticPageManager extends Cinnabar\BasePluginMixin
+class SyntheticPageManager extends BasePluginMixin
 {
 	public $registered_synthetic_pages = array();
 
@@ -221,7 +223,7 @@ class SyntheticPageManager extends Cinnabar\BasePluginMixin
 	{
 		// error_log("debug template_include_controller: " . $post->post_type);
 		if (isset($this->active_synthetic_page))
-			return $this->app->plugin_dir() . '/mixins/SyntheticPageManager/twig-template.php';
+			return $this->app->plugin_dir() . '/Cinnabar/mixins/SyntheticPageManager/twig-template.php';
 		else
 			return $template;
 	}
@@ -329,15 +331,6 @@ class SyntheticPageManager extends Cinnabar\BasePluginMixin
 		}
 	}
 
-	public static function get_synthetic_page_by_location($location)
-	{
-		$query = new WP_Query(array('post_type' => 'synthetic_page', 'pagename' => $location));
-		if ($query->have_posts())
-			return $query->posts[0];
-		else
-			return false;
-	}
-
 	public function create_synthetic_pages($locations)
 	{
 		error_log("got locations to create: " . json_encode($locations));
@@ -350,7 +343,7 @@ class SyntheticPageManager extends Cinnabar\BasePluginMixin
 			{
 				$page_name = $matches[2];
 				$parent_page = $this->get_synthetic_page_by_location($matches[1]);
-				if ($parent_page === false)
+				if ($parent_page === null)
 					throw new Exception("missing parent '$matches[1]' for location '$location'");
 				$parent_id = $parent_page->ID;
 			}
@@ -443,9 +436,18 @@ class SyntheticPageManager extends Cinnabar\BasePluginMixin
 		return $location;
 	}
 
+	public static function get_synthetic_page_by_location($location)
+	{
+		$query = new \WP_Query(array('post_type' => 'synthetic_page', 'pagename' => $location));
+		if ($query->have_posts())
+			return $query->posts[0];
+		else
+			return null;
+	}
+
 	public function get_synthetic_page_by_id($id)
 	{
-		$query = new WP_Query(array(
+		$query = new \WP_Query(array(
 			'post_type' => 'synthetic_page',
 			'p' => $id,
 		));
@@ -458,7 +460,7 @@ class SyntheticPageManager extends Cinnabar\BasePluginMixin
 
 	public function list_synthetic_pages()
 	{
-		$query = new WP_Query(array(
+		$query = new \WP_Query(array(
 			'post_type' => 'synthetic_page',
 			'posts_per_page' => -1,
 		));

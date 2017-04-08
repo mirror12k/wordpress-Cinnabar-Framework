@@ -1,6 +1,8 @@
 <?php
 
 
+namespace Cinnabar;
+
 class ViewController
 {
 	public function __construct($app, $page)

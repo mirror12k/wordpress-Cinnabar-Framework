@@ -1,6 +1,6 @@
 <?php
 
-class TestViewController extends ViewController
+class TestViewController extends Cinnabar\ViewController
 {
 	public function template_args()
 	{

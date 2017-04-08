@@ -10,7 +10,14 @@ class TestPlugin extends Cinnabar\BasePlugin
 	public $plugin_name = 'test-plugin';
 
 	public $mixins = array(
-		'SyntheticPageManager'
+		'SyntheticPageManager' => 'Cinnabar\\SyntheticPageManager',
+		'UpdateTriggerManager' => 'Cinnabar\\UpdateTriggerManager',
+	);
+
+	// required for UpdateTriggerManager
+	public $version_history = array(
+		'0.0.1',
+		'0.0.2',
 	);
 
 
@@ -43,6 +50,13 @@ class TestPlugin extends Cinnabar\BasePlugin
 				),
 			),
 		));
+
+		$this->UpdateTriggerManager->on_plugin_version('0.0.2', array($this, 'hello_world'));
+	}
+
+	public function hello_world()
+	{
+		error_log("hello world from v0.0.2!");
 	}
 }
 
