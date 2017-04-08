@@ -32,6 +32,8 @@ class TestPlugin extends BasePlugin
 		add_filter('rewrite_rules_array', array($this, 'wordpress_rewrite_rules_array'));
 		add_action('add_meta_boxes_synthetic_page', array($this, 'add_meta_boxes_synthetic_page'));
 		add_action('wp_enqueue_scripts', array($this, 'wordpress_enqueue_scripts'));
+		// add_filter('wp_title', array($this, 'template_title_controller'), 10, 3);
+		add_filter('document_title_parts', array($this, 'template_title_controller'));
 	}
 
 	// public function wordpress_activate()
@@ -40,6 +42,21 @@ class TestPlugin extends BasePlugin
 
 	// 	// $this->update_synthetic_pages();
 	// }
+
+	public function template_title_controller($title)
+	{
+		error_log('debug template_title_controller: ' . json_encode($title));
+		if (isset($this->active_synthetic_page))
+		{
+			if (isset($this->active_synthetic_page['title']))
+				$title['title'] = $this->active_synthetic_page['title'];
+			elseif (isset($this->active_view_controller))
+				$title['title'] = $this->active_view_controller->template_title();
+		}
+
+		// $this->update_synthetic_pages();
+		return $title;
+	}
 
 	public function wordpress_init()
 	{
@@ -52,6 +69,7 @@ class TestPlugin extends BasePlugin
 			),
 			'synth-2' => array(
 				'view_controller' => 'TestViewController',
+				'title' => 'my static title',
 			),
 			'synth-2/test-child' => array(
 				'view_controller' => 'TestViewController',

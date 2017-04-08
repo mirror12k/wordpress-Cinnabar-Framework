@@ -6,5 +6,10 @@ class TestViewController extends ViewController
 	{
 		return array('name' => $this->page['path']);
 	}
+
+	public function template_title()
+	{
+		return "my awesome dynamic title";
+	}
 }
 
