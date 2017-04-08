@@ -4,18 +4,62 @@
 
 class BasePlugin
 {
+	// required member value which matches the directory name of the plugin
 	// public $plugin_name = 'base-plugin';
 
+	// overloadable list of string classes representing the mixins
+	public $mixins = array();
 
-	// baseplugin functionality	
+
 	public $plugin_options = array();
 	public $default_plugin_options = array();
 
+	// entry point, must be called at the start of the plugin to load the application functionality
 	public function load_plugin()
 	{
-		$this->load_plugin_options();
+		// load the mixins
+		$this->load_mixins();
+		// load all action/filter hooks
 		$this->load_base_hooks();
 		$this->load_hooks();
+		$this->mixins_load_hooks();
+	}
+
+	// baseplugin functionality	
+	public function load_mixins()
+	{
+		$mixin_classes = $this->mixins;
+		$this->mixins = array();
+		foreach ($mixin_classes as $mixin_class)
+			$this->mixins[$mixin_class] = new $mixin_class($this);
+	}
+
+	public function load_base_hooks()
+	{
+		// allow all cpt/options/pages registration to happen first
+		add_action('init', array($this, 'register'));
+		add_action('init', array($this, 'mixins_register'));
+		// options are loaded after the plugin and mixins have had a chance to register their options
+		add_action('init', array($this, 'load_plugin_options'));
+
+		// standard utility hooks
+		register_activation_hook(plugin_basename($this->plugin_dir('/' . $this->plugin_name . '.php')), array($this, 'wordpress_activate'));
+		add_action('init', array($this, 'wordpress_init'));
+		add_action('admin_init', array($this, 'wordpress_admin_init'));
+		add_action('admin_menu', array($this, 'wordpress_admin_menu'));
+		add_action('wp_loaded', array($this, 'wordpress_loaded'));
+
+		// standard utility hooks for mixins
+		register_activation_hook(plugin_basename($this->plugin_dir('/' . $this->plugin_name . '.php')), array($this, 'mixins_wordpress_activate'));
+		add_action('init', array($this, 'mixins_wordpress_init'));
+		add_action('admin_init', array($this, 'mixins_wordpress_admin_init'));
+		add_action('admin_menu', array($this, 'mixins_wordpress_admin_menu'));
+		add_action('wp_loaded', array($this, 'mixins_wordpress_loaded'));
+
+		// baseplugin hooks for registering the options menu
+		add_filter("plugin_action_links_" . plugin_basename($this->plugin_dir() . '/' . $this->plugin_name . '.php'), array($this, 'baseplugin_action_links'));
+		add_action('admin_init', array($this, 'baseplugin_add_options'));
+		add_action('admin_menu', array($this, 'baseplugin_add_options_page'));
 	}
 
 	public function load_plugin_options()
@@ -23,19 +67,6 @@ class BasePlugin
 		foreach ($this->plugin_options as $section => $section_data)
 			foreach ($section_data['fields'] as $setting => $args)
 				$this->default_plugin_options[$setting] = isset($args['default']) ? $args['default'] : null;
-	}
-
-	public function load_base_hooks()
-	{
-		register_activation_hook(plugin_basename($this->plugin_dir('/' . $this->plugin_name . '.php')), array($this, 'wordpress_activate'));
-		add_action('init', array($this, 'wordpress_init'));
-		add_action('admin_init', array($this, 'wordpress_admin_init'));
-		add_action('admin_menu', array($this, 'wordpress_admin_menu'));
-		add_action('wp_loaded', array($this, 'wordpress_loaded'));
-
-		add_filter("plugin_action_links_" . plugin_basename($this->plugin_dir() . '/' . $this->plugin_name . '.php'), array($this, 'baseplugin_action_links'));
-		add_action('admin_init', array($this, 'baseplugin_add_options'));
-		add_action('admin_menu', array($this, 'baseplugin_add_options_page'));
 	}
 
 	public function baseplugin_add_options()
@@ -110,8 +141,53 @@ class BasePlugin
 		return $links;
 	}
 
+	public function mixins_load_hooks()
+	{
+		foreach ($this->mixins as $class => $mixin)
+			$mixin->load_hooks();
+	}
+
+	public function mixins_register()
+	{
+		foreach ($this->mixins as $class => $mixin)
+			$mixin->register();
+	}
+
+	public function mixins_wordpress_activate()
+	{
+		foreach ($this->mixins as $class => $mixin)
+			$mixin->wordpress_activate();
+	}
+
+	public function mixins_wordpress_init()
+	{
+		foreach ($this->mixins as $class => $mixin)
+			$mixin->wordpress_init();
+	}
+
+	public function mixins_wordpress_admin_init()
+	{
+		foreach ($this->mixins as $class => $mixin)
+			$mixin->wordpress_admin_init();
+	}
+
+	public function mixins_wordpress_admin_menu()
+	{
+		foreach ($this->mixins as $class => $mixin)
+			$mixin->wordpress_admin_menu();
+	}
+
+	public function mixins_wordpress_loaded()
+	{
+		foreach ($this->mixins as $class => $mixin)
+			$mixin->wordpress_loaded();
+	}
+
 	// overridable api
 	public function load_hooks()
+	{}
+
+	public function register()
 	{}
 
 	public function wordpress_activate()
