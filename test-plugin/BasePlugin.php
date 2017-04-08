@@ -31,7 +31,10 @@ class BasePlugin
 		$mixin_classes = $this->mixins;
 		$this->mixins = array();
 		foreach ($mixin_classes as $mixin_class)
+		{
 			$this->mixins[$mixin_class] = new $mixin_class($this);
+			$this->$mixin_class = $this->mixins[$mixin_class];
+		}
 	}
 
 	public function load_base_hooks()

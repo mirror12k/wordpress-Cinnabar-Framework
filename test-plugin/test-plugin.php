@@ -29,7 +29,7 @@ class TestPlugin extends BasePlugin
 
 	public function register()
 	{
-		$this->mixins['SyntheticPageManager']->register_synthetic_pages(array(
+		$this->SyntheticPageManager->register_synthetic_pages(array(
 			'synth-1' => array(
 				'rewrite_rules' => array('doge-\d+/?$' => 'index.php?synthetic_page={{path}}')
 			),
