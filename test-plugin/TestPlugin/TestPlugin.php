@@ -26,14 +26,17 @@ class TestPlugin extends Cinnabar\BasePlugin
 	{
 		$this->SyntheticPageManager->register_synthetic_pages(array(
 			'synth-1' => array(
-				'rewrite_rules' => array('doge-\d+/?$' => 'index.php?synthetic_page={{path}}')
+				'rewrite_rules' => array('doge-\d+/?$' => 'index.php?synthetic_page={{path}}'),
+				'template' => 'TestPlugin/templates/synth.twig',
 			),
 			'synth-2' => array(
 				'view_controller' => 'TestViewController',
 				'title' => 'my static title',
+				'template' => 'TestPlugin/templates/synth.twig',
 			),
 			'synth-2/test-child' => array(
 				'view_controller' => 'TestViewController',
+				'template' => 'TestPlugin/templates/synth.twig',
 			),
 		));
 

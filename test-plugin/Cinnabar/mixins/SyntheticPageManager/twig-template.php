@@ -4,17 +4,18 @@ get_header();
 
 global $test_plugin;
 
-$loader = new Twig_Loader_Array(array(
-    'index' => 'Hello {{ name }}!',
-));
+$loader = new Twig_Loader_Filesystem($test_plugin->plugin_dir());
+// $loader = new Twig_Loader_Array(array(
+//     'index' => 'Hello {{ name }}!',
+// ));
 $twig = new Twig_Environment($loader);
 
-$template_args = array();
+$template_args = array( 'app' => $test_plugin );
 if (isset($test_plugin->SyntheticPageManager->active_view_controller))
 	$template_args = array_merge($template_args, $test_plugin->SyntheticPageManager->active_view_controller->template_args());
 
 
-echo $twig->render('index', $template_args);
+echo $twig->render($test_plugin->SyntheticPageManager->active_synthetic_page['template'], $template_args);
 
 
 get_footer();
