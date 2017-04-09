@@ -12,6 +12,7 @@ class TestPlugin extends Cinnabar\BasePlugin
 	public $mixins = array(
 		'SyntheticPageManager' => 'Cinnabar\\SyntheticPageManager',
 		'UpdateTriggerManager' => 'Cinnabar\\UpdateTriggerManager',
+		'EmailManager' => 'Cinnabar\\EmailManager',
 	);
 
 	// required for UpdateTriggerManager
@@ -52,6 +53,12 @@ class TestPlugin extends Cinnabar\BasePlugin
 		));
 
 		$this->UpdateTriggerManager->on_plugin_version('0.0.2', array($this, 'hello_world'));
+	}
+
+	public function wordpress_loaded()
+	{
+		$data = $this->EmailManager->render_email('TestPlugin/templates/test.twig', array('name' => 'John Doe'));
+		error_log("debug EmailManager: " . json_encode($data));
 	}
 
 	public function hello_world()

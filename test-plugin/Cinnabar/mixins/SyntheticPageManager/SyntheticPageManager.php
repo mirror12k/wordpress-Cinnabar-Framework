@@ -25,6 +25,23 @@ class SyntheticPageManager extends BasePluginMixin
 		add_filter('document_title_parts', array($this, 'template_title_controller'));
 	}
 
+	public function register_synthetic_pages($pages)
+	{
+		foreach ($pages as $location => $page)
+		{
+			if (isset($this->registered_synthetic_pages[$location]))
+				throw new Exception("synthetic page '$location' is registered twice");
+
+			$page['path'] = $location;
+			if (!isset($page['rewrite_rules']))
+				$page['rewrite_rules'] = array();
+			if (!isset($page['rewrite_rules']['{{path}}/?$']))
+				$page['rewrite_rules']['{{path}}/?$'] = 'index.php?synthetic_page={{path}}';
+
+			$this->registered_synthetic_pages[$location] = $page;
+		}
+	}
+
 	public function register()
 	{
 		$this->register_synthetic_page_post_type();
@@ -32,11 +49,12 @@ class SyntheticPageManager extends BasePluginMixin
 
 	public function wordpress_loaded()
 	{
-		error_log('Test Plugin wordpress_loaded');
-
 		$this->fill_out_parent_pages();
-		$this->update_synthetic_pages();
-		$this->update_rewrite_rules();
+		if (is_admin())
+		{
+			$this->update_synthetic_pages();
+			$this->update_rewrite_rules();
+		}
 	}
 
 	public function register_synthetic_page_post_type()
@@ -237,23 +255,6 @@ class SyntheticPageManager extends BasePluginMixin
 		$post_link = str_replace( '/' . $post->post_type . '/', '/', $post_link );
 
 		return $post_link;
-	}
-
-	public function register_synthetic_pages($pages)
-	{
-		foreach ($pages as $location => $page)
-		{
-			if (isset($this->registered_synthetic_pages[$location]))
-				throw new Exception("synthetic page '$location' is registered twice");
-
-			$page['path'] = $location;
-			if (!isset($page['rewrite_rules']))
-				$page['rewrite_rules'] = array();
-			if (!isset($page['rewrite_rules']['{{path}}/?$']))
-				$page['rewrite_rules']['{{path}}/?$'] = 'index.php?synthetic_page={{path}}';
-
-			$this->registered_synthetic_pages[$location] = $page;
-		}
 	}
 
 	public function break_down_location_chain($location)

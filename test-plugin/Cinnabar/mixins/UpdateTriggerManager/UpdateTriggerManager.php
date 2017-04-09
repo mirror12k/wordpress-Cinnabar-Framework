@@ -23,7 +23,7 @@ class UpdateTriggerManager extends BasePluginMixin
 		// we use the first listed version history as the default
 		$this->app->register_plugin_options(array(
 			'cinnabar-update-trigger-manager-settings' => array(
-				'title' => 'Cinnabar Updater Service Section',
+				'title' => 'Cinnabar Update Trigger Manager Section',
 				'fields' => array(
 					'cinnabar-update-trigger-manager-active-plugin-version' => array(
 						'label' => 'currently active plugin version (DO NOT EDIT)',
