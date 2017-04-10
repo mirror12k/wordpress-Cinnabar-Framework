@@ -1,7 +1,7 @@
 
 
 function cinnabar_ajax_set_error_message(msg) {
-	console.log("Cinnabar Ajax Error: ", msg);
+	console.log("Cinnabar Error: ", msg);
 }
 
 function cinnabar_ajax_action (action, action_data, cb) {
@@ -35,7 +35,7 @@ function cinnabar_ajax_action (action, action_data, cb) {
 			cinnabar_ajax_config.nonce = json_data.nonce;
 			cb(json_data);
 			if (json_data.status === 'error') {
-				cinnabar_ajax_set_error_message('Error: ' + json_data.error);
+				cinnabar_ajax_set_error_message(json_data.error);
 			} else if (json_data.status === 'success') {
 				if (json_data.action === 'refresh')
 					location.reload();

@@ -7,6 +7,7 @@ namespace Cinnabar;
 class AjaxGatewayManager extends BasePluginMixin
 {
 	public $registered_ajax_actions = array();
+	public $registered_ajax_validators = array();
 
 	public function load_hooks()
 	{
@@ -20,9 +21,20 @@ class AjaxGatewayManager extends BasePluginMixin
 		foreach ($actions as $action => $description)
 		{
 			if (isset($this->registered_ajax_actions[$action]))
-				throw new Exception("cinnabar ajax action '$action' is registered twice");
+				throw new \Exception("cinnabar ajax action '$action' is registered twice");
 
 			$this->registered_ajax_actions[$action] = $description;
+		}
+	}
+
+	public function register_ajax_validators($validators)
+	{
+		foreach ($validators as $name => $callback)
+		{
+			if (isset($this->registered_ajax_validators[$name]))
+				throw new \Exception("cinnabar ajax validator '$name' is registered twice");
+
+			$this->registered_ajax_validators[$name] = $callback;
 		}
 	}
 
@@ -57,9 +69,18 @@ class AjaxGatewayManager extends BasePluginMixin
 		{
 			$action = (string)$_POST['cinnabar_action'];
 			$data = $_POST['data'];
-			$data['current_user'] = wp_get_current_user();
+			$data['current_user'] = wp_get_current_user()->ID;
 
-			$res = $this->perform_cinnabar_action($action, $data);
+			try {
+				$data = $this->validate_cinnabar_action($action, $data);
+			} catch (\Exception $e) {
+				$res = array(
+					'status' => 'error',
+					'error' => 'Validation Error: ' . $e->getMessage(),
+				);
+			}
+			if (!isset($res))
+				$res = $this->perform_cinnabar_action($action, $data);
 		}
 
 		echo json_encode($res + array( 'nonce' => wp_create_nonce('cinnabar-ajax-nonce') ));
@@ -69,6 +90,25 @@ class AjaxGatewayManager extends BasePluginMixin
 	public function is_valid_action($action)
 	{
 		return isset($this->registered_ajax_actions[$action]);
+	}
+
+	public function validate_cinnabar_action($action, $data)
+	{
+		// error_log("debug ajax action ${action_page}__action_$action"); // DEBUG AJAX
+		if (isset($this->registered_ajax_actions[$action]['validate']))
+		{
+			foreach ($this->registered_ajax_actions[$action]['validate'] as $argument => $validators)
+			{
+				if (!isset($data[$argument]))
+					throw new \Exception("Missing argument: $argument");
+				foreach ($validators as $validator)
+				{
+					$data[$argument] = $this->registered_ajax_validators[$validator]($data, $data[$argument]);
+				}
+			}
+		}
+
+		return $data;
 	}
 
 	public function perform_cinnabar_action($action, $data)
