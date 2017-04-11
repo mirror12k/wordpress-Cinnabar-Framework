@@ -3,6 +3,8 @@
 
 
 
+require_once 'TestPluginPostModel.php';
+require_once 'TestPostViewController.php';
 require_once 'TestViewController.php';
 
 class TestPlugin extends Cinnabar\BasePlugin
@@ -54,6 +56,12 @@ class TestPlugin extends Cinnabar\BasePlugin
 				'view_controller' => 'TestViewController',
 				'template' => 'TestPlugin/templates/synth.twig',
 			),
+			'test_post_view' => array(
+				'rewrite_rules' => array('test_post_view/(\d+)/?$' => 'index.php?synthetic_page={{path}}&test_post_id=$matches[1]'),
+				'view_controller' => 'TestPostViewController',
+				'template' => 'TestPlugin/templates/test_post.twig',
+				'query_vars' => array('test_post_id'),
+			),
 		));
 
 		// $this->AjaxGatewayManager->register_ajax_validators(array(
@@ -72,6 +80,42 @@ class TestPlugin extends Cinnabar\BasePlugin
 		));
 
 		$this->UpdateTriggerManager->on_plugin_version('0.0.2', array($this, 'hello_world'));
+
+		$this->register_test_plugin_post_type();
+	}
+
+	public function register_test_plugin_post_type()
+	{
+		register_post_type('test_plugin_post', array(
+			'labels' => array(
+				'name' => __( 'Test Plugin Posts', 'test_plugin_post' ),
+				'singular_name' => __( 'Test Plugin Post', 'test_plugin_post' ),
+				'add_new' => __( 'Add New', 'test_plugin_post' ),
+				'add_new_item' => __( 'Add New Test Plugin Post', 'test_plugin_post' ),
+				'edit_item' => __( 'Edit Test Plugin Posts', 'test_plugin_post' ),
+				'new_item' => __( 'New Test Plugin Post', 'test_plugin_post' ),
+				'view_item' => __( 'View Test Plugin Post', 'test_plugin_post' ),
+				'search_items' => __( 'Search Test Plugin Posts', 'test_plugin_post' ),
+				'not_found' => __( 'No Test Plugin Posts found', 'test_plugin_post' ),
+				'not_found_in_trash' => __( 'No Test Plugin Posts found in Trash', 'test_plugin_post' ),
+				'parent_item_colon' => __( 'Parent Test Plugin Post:', 'test_plugin_post'),
+				'menu_name' => __( 'Test Plugin Posts', 'test_plugin_post' ),
+			),
+			'hierarchical' => false,
+			'description' => __( 'Test Plugin Posts', 'test_plugin_post' ),
+			'supports' => array( 'title', 'page-attributes' ),
+			'public' => true,
+			'show_ui' => true,
+			'show_in_menu' => true,
+			// 'show_in_nav_menus' => true,
+			'publicly_queryable' => true,
+			'exclude_from_search' => true,
+			'has_archive' => true,
+			'query_var' => true,
+			'can_export' => true,
+			'rewrite' => array('slug' => false),
+			'capability_type' => 'page'
+		));
 	}
 
 	// public function wordpress_loaded()

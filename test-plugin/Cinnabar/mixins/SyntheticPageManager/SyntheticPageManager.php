@@ -22,6 +22,7 @@ class SyntheticPageManager extends BasePluginMixin
 		add_action('add_meta_boxes_synthetic_page', array($this, 'add_meta_boxes_synthetic_page'));
 		add_action('wp_enqueue_scripts', array($this, 'wordpress_enqueue_scripts'));
 		// add_filter('wp_title', array($this, 'template_title_controller'), 10, 3);
+		add_filter('query_vars', array($this, 'template_query_vars'));
 		add_filter('document_title_parts', array($this, 'template_title_controller'));
 	}
 
@@ -89,21 +90,6 @@ class SyntheticPageManager extends BasePluginMixin
 			'rewrite' => array('slug' => false),
 			'capability_type' => 'page'
 		));
-	}
-
-	public function template_title_controller($title)
-	{
-		// error_log('debug template_title_controller: ' . json_encode($title));
-		if (isset($this->active_synthetic_page))
-		{
-			if (isset($this->active_synthetic_page['title']))
-				$title['title'] = $this->active_synthetic_page['title'];
-			elseif (isset($this->active_view_controller))
-				$title['title'] = $this->active_view_controller->template_title();
-		}
-
-		// $this->update_synthetic_pages();
-		return $title;
 	}
 
 	public function wordpress_enqueue_scripts()
@@ -220,6 +206,35 @@ class SyntheticPageManager extends BasePluginMixin
 <?php
 	}
 
+	public function template_title_controller($title)
+	{
+		// error_log('debug template_title_controller: ' . json_encode($title));
+		if (isset($this->active_synthetic_page))
+		{
+			if (isset($this->active_synthetic_page['title']))
+				$title['title'] = $this->active_synthetic_page['title'];
+			elseif (isset($this->active_view_controller))
+				$title['title'] = $this->active_view_controller->template_title();
+		}
+
+		// $this->update_synthetic_pages();
+		return $title;
+	}
+
+	public function template_query_vars($query_vars)
+	{
+		foreach ($this->registered_synthetic_pages as $location => $page)
+		{
+			if (isset($page['query_vars']))
+				foreach ($page['query_vars'] as $arg)
+				{
+					// error_log("added query var $arg");
+					$query_vars[] = $arg;
+				}
+		}
+		return $query_vars;
+	}
+
 	public function template_redirect_controller()
 	{
 		global $post;
@@ -230,7 +245,7 @@ class SyntheticPageManager extends BasePluginMixin
 			$this->active_synthetic_page = $this->registered_synthetic_pages[$location];
 			if (isset($this->active_synthetic_page['view_controller']))
 			{
-				$this->active_view_controller = new $this->active_synthetic_page['view_controller']($this, $this->active_synthetic_page);
+				$this->active_view_controller = new $this->active_synthetic_page['view_controller']($this->app, $this->active_synthetic_page);
 
 				$this->active_view_controller->template_redirect();
 			}
@@ -437,7 +452,7 @@ class SyntheticPageManager extends BasePluginMixin
 		return $location;
 	}
 
-	public static function get_synthetic_page_by_location($location)
+	public function get_synthetic_page_by_location($location)
 	{
 		$query = new \WP_Query(array('post_type' => 'synthetic_page', 'pagename' => $location));
 		if ($query->have_posts())

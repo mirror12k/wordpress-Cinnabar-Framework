@@ -14,6 +14,8 @@ require_once 'vendor/autoload.php';
 
 require_once 'Cinnabar/BasePlugin.php';
 
+require_once 'Cinnabar/CustomPostModel.php';
+
 require_once 'Cinnabar/mixins/SyntheticPageManager/SyntheticPageManager.php';
 require_once 'Cinnabar/mixins/UpdateTriggerManager/UpdateTriggerManager.php';
 require_once 'Cinnabar/mixins/EmailManager/EmailManager.php';
