@@ -56,17 +56,17 @@ class TestPlugin extends Cinnabar\BasePlugin
 			),
 		));
 
-		$this->AjaxGatewayManager->register_ajax_validators(array(
-			'is_logged_in_validator' => array($this, 'is_logged_in_validator'),
-			'intval_validator' => array($this, 'intval_validator'),
-		));
+		// $this->AjaxGatewayManager->register_ajax_validators(array(
+		// 	'is_logged_in_validator' => array($this, 'is_logged_in_validator'),
+		// 	'intval_validator' => array($this, 'intval_validator'),
+		// ));
 
 		$this->AjaxGatewayManager->register_ajax_actions(array(
 			'say-hello-world' => array(
 				'callback' => array($this, 'ajax_hello_world'),
 				'validate' => array(
 					'current_user' => array('is_logged_in_validator'),
-					'asdf' => array('intval_validator'),
+					'asdf' => array('cast_int'),
 				),
 			),
 		));
@@ -80,17 +80,17 @@ class TestPlugin extends Cinnabar\BasePlugin
 	// 	error_log("debug EmailManager: " . json_encode($data));
 	// }
 
-	public function is_logged_in_validator($data, $arg)
-	{
-		if ($data['current_user'] === 0)
-			throw new Exception("Please log in");
-		return $arg;
-	}
+	// public function is_logged_in_validator($data, $arg)
+	// {
+	// 	if ($data['current_user'] === 0)
+	// 		throw new Exception("Please log in");
+	// 	return $arg;
+	// }
 
-	public function intval_validator($data, $arg)
-	{
-		return intval($arg);
-	}
+	// public function intval_validator($data, $arg)
+	// {
+	// 	return intval($arg);
+	// }
 
 	public function hello_world()
 	{

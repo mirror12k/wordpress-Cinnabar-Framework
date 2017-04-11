@@ -16,6 +16,17 @@ class AjaxGatewayManager extends BasePluginMixin
 		add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
 	}
 
+	public function register()
+	{
+		$this->register_ajax_validators(array(
+			'is_logged_in_validator' => array('Cinnabar\\AjaxGatewayManager', 'is_logged_in_validator'),
+			'cast_bool' => array('Cinnabar\\AjaxGatewayManager', 'cast_bool'),
+			'cast_int' => array('Cinnabar\\AjaxGatewayManager', 'cast_int'),
+			'cast_string' => array('Cinnabar\\AjaxGatewayManager', 'cast_string'),
+			'parse_json' => array('Cinnabar\\AjaxGatewayManager', 'parse_json'),
+		));
+	}
+
 	public function register_ajax_actions($actions)
 	{
 		foreach ($actions as $action => $description)
@@ -115,6 +126,37 @@ class AjaxGatewayManager extends BasePluginMixin
 	{
 		// error_log("debug ajax action ${action_page}__action_$action"); // DEBUG AJAX
 		return $this->registered_ajax_actions[$action]['callback']($data);
+	}
+
+
+
+
+	// default builtin validators
+	public static function is_logged_in_validator($data, $arg)
+	{
+		if ($data['current_user'] === 0)
+			throw new Exception("Please log in");
+		return $arg;
+	}
+
+	public static function cast_bool($data, $arg)
+	{
+		return (bool)$arg;
+	}
+
+	public static function cast_int($data, $arg)
+	{
+		return (int)$arg;
+	}
+
+	public static function cast_string($data, $arg)
+	{
+		return (string)$arg;
+	}
+
+	public static function parse_json($data, $arg)
+	{
+		return json_decode($arg);
 	}
 }
 
