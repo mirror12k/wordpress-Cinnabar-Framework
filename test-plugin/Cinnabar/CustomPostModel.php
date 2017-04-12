@@ -6,6 +6,7 @@ class CustomPostModel
 {
 	// public static $config = array(
 	// 	'post_type' => 'my_custom_post',
+	// 	'slug_prefix' => '',
 	// 	'fields' => array(
 	// 		'my_custom_field' => array(
 	// 			'type' => 'meta',
@@ -31,7 +32,6 @@ class CustomPostModel
 		'modified' => 'post_modified',
 		'modified_gmt' => 'post_modified_gmt',
 		'comment_count' => 'comment_count',
-		'menu_order' => 'menu_order',
 		'menu_order' => 'menu_order',
 	);
 
@@ -77,6 +77,11 @@ class CustomPostModel
 		
 	// }
 
+	public static function from_post($post)
+	{
+		return new static($post);
+	}
+
 	public static function get_by_id($id)
 	{
 		// error_log("debug get_by_id: $id");
@@ -87,9 +92,46 @@ class CustomPostModel
 		if ($post->post_type !== static::$config['post_type'])
 			return null;
 
-		return new static($post);
+		return static::from_post($post);
 	}
 
+	public static function get_by_slug($team_type, $slug, $args=array())
+	{
+		$args = array_merge($args, array(
+			// 'post_status' => array('publish', 'pending'),
+			'name' => static::$config['slug_prefix'] . (string)$slug,
+			'post_type' => static::$config['post_type'],
+			'posts_per_page' => 1,
+		));
+
+		$query = new WP_Query($args);
+		if ($query->have_posts())
+			return static::from_post($query->post);
+		else
+			return null;
+	}
+
+	public static function list_posts($args=array())
+	{
+		$args['post_type'] = static::$config['post_type'];
+		if (!isset($args['posts_per_page']))
+			$args['posts_per_page'] = -1;
+
+		$query = new WP_Query($args);
+		$posts = array();
+		foreach ($query->posts as $post)
+			$posts[] = static::from_post($post);
+
+		return $posts;
+	}
+
+	public static function search_posts($name, $count=-1, $args=array())
+	{
+		$args['s'] = $name;
+		$args['posts_per_page'] = $count;
+		
+		return static::list_posts($args);
+	}
 }
 
 

@@ -16,6 +16,7 @@ class TestPlugin extends Cinnabar\BasePlugin
 		'UpdateTriggerManager' => 'Cinnabar\\UpdateTriggerManager',
 		'EmailManager' => 'Cinnabar\\EmailManager',
 		'AjaxGatewayManager' => 'Cinnabar\\AjaxGatewayManager',
+		'CustomPostManager' => 'Cinnabar\\CustomPostManager',
 	);
 
 	// required for UpdateTriggerManager
@@ -78,6 +79,8 @@ class TestPlugin extends Cinnabar\BasePlugin
 				),
 			),
 		));
+
+		$this->CustomPostManager->register_custom_post_type('TestPluginPostModel');
 
 		$this->UpdateTriggerManager->on_plugin_version('0.0.2', array($this, 'hello_world'));
 
