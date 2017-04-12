@@ -18,6 +18,7 @@ class CustomPostManager extends BasePluginMixin
 	public function load_hooks()
 	{
 		add_action('add_meta_boxes', array($this, 'wordpress_add_meta_boxes'), 10, 2);
+		add_action('save_post', array($this, 'wordpress_save_post'), 10, 2);
 		add_filter('post_type_link', array($this, 'wordpress_post_type_link'), 1, 2);
 	}
 
@@ -33,6 +34,32 @@ class CustomPostManager extends BasePluginMixin
 				'normal',
 				'default'
 			);
+	}
+
+	public function wordpress_save_post($post_id, $post)
+	{
+		// Check if the user has permissions to save data.
+		if (!current_user_can('edit_post', $post_id))
+			return;
+
+		// Check if it's not an autosave.
+		if (wp_is_post_autosave($post_id))
+			return;
+
+		// Check if it's not a revision.
+		if (wp_is_post_revision($post_id))
+			return;
+
+		$class = $this->get_custom_post_class_by_post_type($post->post_type);
+		if (isset($class))
+		{
+			$post = $class::from_post($post);
+			foreach ($class::$config['fields'] as $name => $field)
+			{
+				error_log("got value for $name: " . $_POST[$name]);
+				$post->$name = $_POST[$name];
+			}
+		}
 	}
 
 	public function wordpress_post_type_link($url, $post)
