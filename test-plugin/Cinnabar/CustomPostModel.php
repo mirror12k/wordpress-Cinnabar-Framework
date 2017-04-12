@@ -7,9 +7,14 @@ class CustomPostModel
 	// public static $config = array(
 	// 	'post_type' => 'my_custom_post',
 	// 	'slug_prefix' => '',
+	// 	'custom_url_callback' => array('MyCustomPostModel', 'custom_url'),
 	// 	'fields' => array(
 	// 		'my_custom_field' => array(
 	// 			'type' => 'meta',
+	// 		),
+	// 		'my_custom_field_with_description' => array(
+	// 			'type' => 'meta',
+	// 			'description' => 'my custom field #2',
 	// 		),
 	// 	),
 	// );

@@ -18,6 +18,7 @@ class CustomPostManager extends BasePluginMixin
 	public function load_hooks()
 	{
 		add_action('add_meta_boxes', array($this, 'wordpress_add_meta_boxes'), 10, 2);
+		add_filter('post_type_link', array($this, 'wordpress_post_type_link'), 1, 2);
 	}
 
 	public function wordpress_add_meta_boxes($post_type, $post)
@@ -32,6 +33,20 @@ class CustomPostManager extends BasePluginMixin
 				'normal',
 				'default'
 			);
+	}
+
+	public function wordpress_post_type_link($url, $post)
+	{
+		if (isset($post))
+		{
+			$class = $this->get_custom_post_class_by_post_type($post->post_type);
+			if (isset($class) && isset($class::$config['custom_url_callback']))
+			{
+				$callback = $class::$config['custom_url_callback'];
+				return $callback($class::from_post($post));
+			}
+		}
+		return $url;
 	}
 
 	public function render_meta_boxes($post)
