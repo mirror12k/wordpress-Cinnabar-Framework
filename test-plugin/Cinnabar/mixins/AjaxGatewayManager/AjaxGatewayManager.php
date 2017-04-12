@@ -135,7 +135,7 @@ class AjaxGatewayManager extends BasePluginMixin
 	public static function is_logged_in_validator($data, $arg)
 	{
 		if ($data['current_user'] === 0)
-			throw new Exception("Please log in");
+			throw new \Exception("Please log in");
 		return $arg;
 	}
 

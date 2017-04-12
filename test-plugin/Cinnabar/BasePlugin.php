@@ -217,7 +217,7 @@ class BasePlugin
 	{
 		foreach ($new_options as $section => $section_data)
 			if (isset($this->plugin_options[$section]))
-				throw new Exception("redefinition of plugin options section '$section'");
+				throw new \Exception("redefinition of plugin options section '$section'");
 			else
 				$this->plugin_options[$section] = $section_data;
 	}

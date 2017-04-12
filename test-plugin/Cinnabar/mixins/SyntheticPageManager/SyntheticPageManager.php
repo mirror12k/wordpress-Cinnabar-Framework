@@ -31,7 +31,7 @@ class SyntheticPageManager extends BasePluginMixin
 		foreach ($pages as $location => $page)
 		{
 			if (isset($this->registered_synthetic_pages[$location]))
-				throw new Exception("synthetic page '$location' is registered twice");
+				throw new \Exception("synthetic page '$location' is registered twice");
 
 			$page['path'] = $location;
 			if (!isset($page['rewrite_rules']))
@@ -360,7 +360,7 @@ class SyntheticPageManager extends BasePluginMixin
 				$page_name = $matches[2];
 				$parent_page = $this->get_synthetic_page_by_location($matches[1]);
 				if ($parent_page === null)
-					throw new Exception("missing parent '$matches[1]' for location '$location'");
+					throw new \Exception("missing parent '$matches[1]' for location '$location'");
 				$parent_id = $parent_page->ID;
 			}
 			else

@@ -68,11 +68,44 @@ class CustomPostManager extends BasePluginMixin
 
 			$value = $post->$name;
 
+
 			?>
 			<tr>
 				<th><label for="<?php echo htmlspecialchars($name); ?>" class="<?php echo htmlspecialchars($name); ?>_label"><?php echo htmlentities(__($description, $class::$config['post_type'])); ?></label></th>
 				<td>
+				<?php
+
+				if (isset($field['cast']) && $field['cast'] === 'bool')
+				{
+					?>
+					<input type='checkbox' id="<?php echo htmlspecialchars($name); ?>" name="<?php echo htmlspecialchars($name); ?>" value='1' <?php echo (1 == $value ? "checked='checked'" : ""); ?> />
+					<?php
+				}
+				elseif (isset($field['cast']) && ($field['cast'] === 'int' || $field['cast'] === 'string'))
+				{
+					?>
 					<input type="text" id="<?php echo htmlspecialchars($name); ?>" name="<?php echo htmlspecialchars($name); ?>" value="<?php echo htmlspecialchars($value); ?>" />
+					<?php
+				}
+				elseif (isset($field['cast']) && $field['cast'] === 'option')
+				{
+					?>
+					<select id="<?php echo htmlspecialchars($name); ?>" name="<?php echo htmlspecialchars($name); ?>">
+						<option value="">--</option>
+						<?php foreach ($field['option_values'] as $key => $desc) { ?>
+							<option value="<?php echo htmlspecialchars($key); ?>" <?php echo ($key === $value ? "selected='selected'" : ""); ?>><?php echo htmlentities($desc); ?></option>
+						<?php } ?>
+					</select>
+					<?php
+				}
+				else
+				{
+					?>
+					<input type="text" id="<?php echo htmlspecialchars($name); ?>" name="<?php echo htmlspecialchars($name); ?>" value="<?php echo htmlspecialchars($value); ?>" />
+					<?php
+				}
+
+				?>
 				</td>
 			</tr>
 			<?php

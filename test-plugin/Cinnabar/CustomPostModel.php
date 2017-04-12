@@ -7,16 +7,19 @@ class CustomPostModel
 	// public static $config = array(
 	// 	'post_type' => 'my_custom_post',
 	// 	'slug_prefix' => '',
-	// 	'custom_url_callback' => array('MyCustomPostModel', 'custom_url'),
+	// 	// 'custom_url_callback' => array('MyCustomPostModel', 'custom_url'),
 	// 	'fields' => array(
 	// 		'my_custom_field' => array(
 	// 			'type' => 'meta',
-	// 		),
-	// 		'my_custom_field_with_description' => array(
-	// 			'type' => 'meta',
-	// 			'description' => 'my custom field #2',
+	// 			// 'description' => 'my custom field #2',
 	// 		),
 	// 	),
+	// 	// 'custom_cast_types' => array(
+	// 	// 	'my_cast' => array(
+	// 	// 		'from_string' => 'callback',
+	// 	// 		'to_string' => 'callback',
+	// 	// 	),
+	// 	// )
 	// );
 
 	public static $default_wordpress_fields = array(
@@ -64,17 +67,83 @@ class CustomPostModel
 		{
 			if (static::$config['fields'][$name]['type'] === 'meta')
 			{
-				return get_post_meta($this->post->ID, $name, true);
+				$value = get_post_meta($this->post->ID, $name, true);
+
+				if (isset(static::$config['fields'][$name]['cast']))
+					$value = static::cast_value_from_string(static::$config['fields'][$name]['cast'], $value, static::$config['fields'][$name]);
+
+				return $value;
 			}
 			elseif (static::$config['fields'][$name]['type'] === 'meta-array')
 			{
-				return get_post_meta($this->post->ID, $name, false);
+				$value_array = get_post_meta($this->post->ID, $name, false);
+
+				if (isset(static::$config['fields'][$name]['cast']))
+				{
+					$cast_array = array();
+					foreach ($value_array as $value)
+						$cast_array[] = static::cast_value_from_string(static::$config['fields'][$name]['cast'], $value, static::$config['fields'][$name]);
+					$value_array = $cast_array;
+				}
+
+				return $value_array;
 			}
 			else
 				throw new \Exception("Invalid CPM field type for '$name', from object type " . static::$config['post_type']);
 		}
 		else
 			throw new \Exception("Unknown property '$name' requested, from object type " . static::$config['post_type']);
+	}
+
+	public function cast_value_from_string($cast_type, $value, $field)
+	{
+		if ($cast_type === 'bool')
+			return (bool)$value;
+		elseif ($cast_type === 'int')
+			return (int)$value;
+		elseif ($cast_type === 'float')
+			return (float)$value;
+		elseif ($cast_type === 'string')
+			return (string)$value;
+		elseif ($cast_type === 'option')
+			return (string)$value;
+		elseif ($cast_type === 'json')
+			return json_decode($value);
+		elseif (isset(static::$config['custom_cast_types']) && isset(static::$config['custom_cast_types'][$cast_type]))
+		{
+			$callback = static::$config['custom_cast_types'][$cast_type]['from_string'];
+			return $callback($value, $field);
+		}
+		else
+			throw new \Exception("Unknown cast type '$cast_type' requested, from object type " . static::$config['post_type']);
+	}
+
+	public function cast_value_to_string($cast_type, $value, $field)
+	{
+		if ($cast_type === 'bool')
+			return (string)$value;
+		elseif ($cast_type === 'int')
+			return (string)$value;
+		elseif ($cast_type === 'float')
+			return (string)$value;
+		elseif ($cast_type === 'string')
+			return (string)$value;
+		elseif ($cast_type === 'option')
+		{
+			if (array_key_exists((string)$value, $field['option_values']))
+				return (string)$value;
+			else
+				return '';
+		}
+		elseif ($cast_type === 'json')
+			return json_encode($value);
+		elseif (isset(static::$config['custom_cast_types']) && isset(static::$config['custom_cast_types'][$cast_type]))
+		{
+			$callback = static::$config['custom_cast_types'][$cast_type]['to_string'];
+			return $callback($value, $field);
+		}
+		else
+			throw new \Exception("Unknown cast type '$cast_type' requested, from object type " . static::$config['post_type']);
 	}
 
 	// public function __set($name, $value)
