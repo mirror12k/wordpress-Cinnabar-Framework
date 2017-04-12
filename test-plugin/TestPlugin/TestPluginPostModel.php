@@ -10,6 +10,7 @@ class TestPluginPostModel extends CustomPostModel
 		'fields' => array(
 			'my_custom_field' => array(
 				'type' => 'meta',
+				'description' => 'My Custom Field',
 			),
 			'my_custom_bool' => array(
 				'type' => 'meta',
@@ -26,7 +27,7 @@ class TestPluginPostModel extends CustomPostModel
 			'my_custom_option' => array(
 				'type' => 'meta',
 				'cast' => 'option',
-				'option_values' => array('red', 'blue', 'grey'),
+				'option_values' => array('red' => 'Red', 'blue' => 'Blue', 'grey' => 'Grey'),
 			),
 			'my_custom_json' => array(
 				'type' => 'meta',

@@ -53,6 +53,7 @@ class CustomPostModel
 	public function __isset($name)
 	{
 		return array_key_exists($name, CustomPostModel::$default_wordpress_fields)
+				|| $name === 'url'
 				|| array_key_exists($name, static::$config['fields']);
 	}
 
@@ -62,6 +63,10 @@ class CustomPostModel
 		{
 			$field = CustomPostModel::$default_wordpress_fields[$name];
 			return $this->post->$field;
+		}
+		elseif ($name === 'url')
+		{
+			return get_permalink($this->post);
 		}
 		elseif (isset(static::$config['fields'][$name]))
 		{
