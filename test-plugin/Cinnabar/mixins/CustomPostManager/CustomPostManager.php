@@ -56,7 +56,7 @@ class CustomPostManager extends BasePluginMixin
 			$post = $class::from_post($post);
 			foreach ($class::$config['fields'] as $name => $field)
 			{
-				error_log("got value for $name: " . $_POST[$name]);
+				error_log("got value for $name: " . json_encode($_POST[$name]));
 				$post->$name = $_POST[$name];
 			}
 		}
@@ -101,37 +101,23 @@ class CustomPostManager extends BasePluginMixin
 				<th><label for="<?php echo htmlspecialchars($name); ?>" class="<?php echo htmlspecialchars($name); ?>_label"><?php echo htmlentities(__($description, $class::$config['post_type'])); ?></label></th>
 				<td>
 				<?php
+					if ($field['type'] === 'meta')
+					{
+						$this->render_meta_input($field, $name, $value);
+					}
+					elseif ($field['type'] === 'meta-array')
+					{
+						$value_array = $value;
 
-				if (isset($field['cast']) && $field['cast'] === 'bool')
-				{
-					?>
-					<input type='checkbox' id="<?php echo htmlspecialchars($name); ?>" name="<?php echo htmlspecialchars($name); ?>" value='1' <?php echo (1 == $value ? "checked='checked'" : ""); ?> />
-					<?php
-				}
-				elseif (isset($field['cast']) && ($field['cast'] === 'int' || $field['cast'] === 'string'))
-				{
-					?>
-					<input type="text" id="<?php echo htmlspecialchars($name); ?>" name="<?php echo htmlspecialchars($name); ?>" value="<?php echo htmlspecialchars($value); ?>" />
-					<?php
-				}
-				elseif (isset($field['cast']) && $field['cast'] === 'option')
-				{
-					?>
-					<select id="<?php echo htmlspecialchars($name); ?>" name="<?php echo htmlspecialchars($name); ?>">
-						<option value="">--</option>
-						<?php foreach ($field['option_values'] as $key => $desc) { ?>
-							<option value="<?php echo htmlspecialchars($key); ?>" <?php echo ($key === $value ? "selected='selected'" : ""); ?>><?php echo htmlentities($desc); ?></option>
-						<?php } ?>
-					</select>
-					<?php
-				}
-				else
-				{
-					?>
-					<input type="text" id="<?php echo htmlspecialchars($name); ?>" name="<?php echo htmlspecialchars($name); ?>" value="<?php echo htmlspecialchars($value); ?>" />
-					<?php
-				}
+						echo "<div data-field-name='" . htmlspecialchars($name) . "' class='cpm-input-array'>";
+						// if (count($value_array) > 0)
+							foreach (range(0, count($value_array)) as $i)
+							{
+								$this->render_meta_input($field, $name . '[' . $i . ']', $value_array[$i]);
+							}
 
+						echo "</div>";
+					}
 				?>
 				</td>
 			</tr>
@@ -139,6 +125,41 @@ class CustomPostManager extends BasePluginMixin
 		}
 
 		echo '</table>';
+	}
+
+	public function render_meta_input($field, $input_name, $value)
+	{
+		echo "<div>";
+		if (isset($field['cast']) && $field['cast'] === 'bool')
+		{
+			?>
+			<input type='checkbox' name="<?php echo htmlspecialchars($input_name); ?>" value='1' <?php echo (1 == $value ? "checked='checked'" : ""); ?> />
+			<?php
+		}
+		elseif (isset($field['cast']) && ($field['cast'] === 'int' || $field['cast'] === 'string'))
+		{
+			?>
+			<input type="text" name="<?php echo htmlspecialchars($input_name); ?>" value="<?php echo htmlspecialchars($value); ?>" />
+			<?php
+		}
+		elseif (isset($field['cast']) && $field['cast'] === 'option')
+		{
+			?>
+			<select name="<?php echo htmlspecialchars($input_name); ?>">
+				<option value="">--</option>
+				<?php foreach ($field['option_values'] as $key => $desc) { ?>
+					<option value="<?php echo htmlspecialchars($key); ?>" <?php echo ($key === $value ? "selected='selected'" : ""); ?>><?php echo htmlentities($desc); ?></option>
+				<?php } ?>
+			</select>
+			<?php
+		}
+		else
+		{
+			?>
+			<input type="text" name="<?php echo htmlspecialchars($input_name); ?>" value="<?php echo htmlspecialchars($value); ?>" />
+			<?php
+		}
+		echo "</div>";
 	}
 
 	public function get_custom_post_class_by_post_type($post_type)

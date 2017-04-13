@@ -116,25 +116,54 @@ class CustomPostModel
 
 				update_post_meta($this->post->ID, $name, $value);
 			}
-			// elseif (static::$config['fields'][$name]['type'] === 'meta-array')
-			// {
-			// 	$value_array = get_post_meta($this->post->ID, $name, false);
+			elseif (static::$config['fields'][$name]['type'] === 'meta-array')
+			{
+				$value_array = $value;
 
-			// 	if (isset(static::$config['fields'][$name]['cast']))
-			// 	{
-			// 		$cast_array = array();
-			// 		foreach ($value_array as $value)
-			// 			$cast_array[] = static::cast_value_from_string(static::$config['fields'][$name]['cast'], $value, static::$config['fields'][$name]);
-			// 		$value_array = $cast_array;
-			// 	}
+				if (isset(static::$config['fields'][$name]['cast']))
+				{
+					$cast_array = array();
+					foreach ($value_array as $value)
+						$cast_array[] = static::cast_value_to_string(static::$config['fields'][$name]['cast'], $value, static::$config['fields'][$name]);
+					$value_array = $cast_array;
+				}
 
-			// 	return $value_array;
-			// }
+				delete_post_meta($this->post->ID, $name);
+
+				foreach ($value_array as $value)
+					add_post_meta($this->post->ID, $name, $value, false);
+
+				return $value_array;
+			}
 			else
 				throw new \Exception("Invalid CPM field type for '$name', to object type " . static::$config['post_type']);
 		}
 		else
 			throw new \Exception("Attempt to set unknown property '$name', to object type " . static::$config['post_type']);
+	}
+
+	public function add($name, $value)
+	{
+		if (isset(static::$config['fields'][$name]) && static::$config['fields'][$name]['type'] === 'meta-array')
+		{
+			if (isset(static::$config['fields'][$name]['cast']))
+				$value = static::cast_value_to_string(static::$config['fields'][$name]['cast'], $value, static::$config['fields'][$name]);
+			add_post_meta($this->post->ID, $name, $value, false);
+		}
+		else
+			throw new \Exception("Attempt to add invalid property value '$name', to object type " . static::$config['post_type']);
+	}
+
+	public function remove($name, $value)
+	{
+		if (isset(static::$config['fields'][$name]) && static::$config['fields'][$name]['type'] === 'meta-array')
+		{
+			if (isset(static::$config['fields'][$name]['cast']))
+				$value = static::cast_value_to_string(static::$config['fields'][$name]['cast'], $value, static::$config['fields'][$name]);
+			delete_post_meta($this->post->ID, $name, $value);
+		}
+		else
+			throw new \Exception("Attempt to remove invalid property value '$name', to object type " . static::$config['post_type']);
 	}
 
 	public function cast_value_from_string($cast_type, $value, $field)

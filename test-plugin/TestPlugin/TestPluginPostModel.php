@@ -33,6 +33,10 @@ class TestPluginPostModel extends CustomPostModel
 				'type' => 'meta',
 				'cast' => 'json',
 			),
+			'my_custom_int_array' => array(
+				'type' => 'meta-array',
+				'cast' => 'int',
+			),
 		),
 	);
 
