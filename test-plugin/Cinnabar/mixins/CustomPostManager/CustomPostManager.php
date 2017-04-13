@@ -120,6 +120,7 @@ class CustomPostManager extends BasePluginMixin
 						echo "<div class='cpm-input-array-template' style='display: none;'>";
 						echo "<div class='cpm-input-array-field'>";
 						$this->render_meta_input($field, '', '', true);
+						echo "<button type='button' class='cpm-input-array-remove-button'>X</button>";
 						echo "</div>";
 						echo "</div>";
 						echo "<div class='cpm-input-array-container'>";
@@ -128,6 +129,7 @@ class CustomPostManager extends BasePluginMixin
 							{
 								echo "<div class='cpm-input-array-field'>";
 								$this->render_meta_input($field, $name . '[' . $i . ']', $value_array[$i]);
+								echo "<button type='button' class='cpm-input-array-remove-button'>X</button>";
 								echo "</div>";
 							}
 
