@@ -20,6 +20,13 @@ class CustomPostManager extends BasePluginMixin
 		add_action('add_meta_boxes', array($this, 'wordpress_add_meta_boxes'), 10, 2);
 		add_action('save_post', array($this, 'wordpress_save_post'), 10, 2);
 		add_filter('post_type_link', array($this, 'wordpress_post_type_link'), 1, 2);
+		add_filter('admin_enqueue_scripts', array($this, 'wordpress_admin_enqueue_scripts'));
+	}
+
+	public function wordpress_admin_enqueue_scripts()
+	{
+		wp_enqueue_script('jquery');
+		wp_enqueue_script('cinnabar-custom-post-manager-helper', $this->app->plugin_url('/Cinnabar/mixins/CustomPostManager/custom-post-manager-helper.js'));
 	}
 
 	public function wordpress_add_meta_boxes($post_type, $post)
@@ -110,12 +117,22 @@ class CustomPostManager extends BasePluginMixin
 						$value_array = $value;
 
 						echo "<div data-field-name='" . htmlspecialchars($name) . "' class='cpm-input-array'>";
-						// if (count($value_array) > 0)
-							foreach (range(0, count($value_array)) as $i)
+						echo "<div class='cpm-input-array-template' style='display: none;'>";
+						echo "<div class='cpm-input-array-field'>";
+						$this->render_meta_input($field, '', '', true);
+						echo "</div>";
+						echo "</div>";
+						echo "<div class='cpm-input-array-container'>";
+						if (count($value_array) > 0)
+							foreach (range(0, count($value_array) - 1) as $i)
 							{
+								echo "<div class='cpm-input-array-field'>";
 								$this->render_meta_input($field, $name . '[' . $i . ']', $value_array[$i]);
+								echo "</div>";
 							}
 
+						echo "</div>";
+						echo "<button type='button' class='cpm-input-array-add-button'>+</button>";
 						echo "</div>";
 					}
 				?>
@@ -127,25 +144,24 @@ class CustomPostManager extends BasePluginMixin
 		echo '</table>';
 	}
 
-	public function render_meta_input($field, $input_name, $value)
+	public function render_meta_input($field, $input_name, $value, $template=false)
 	{
-		echo "<div>";
 		if (isset($field['cast']) && $field['cast'] === 'bool')
 		{
 			?>
-			<input type='checkbox' name="<?php echo htmlspecialchars($input_name); ?>" value='1' <?php echo (1 == $value ? "checked='checked'" : ""); ?> />
+			<input type='checkbox' class='field-name-holder' <?php echo ($template ? '' : "name='" . htmlspecialchars($input_name) . "'"); ?> value='1' <?php echo (1 == $value ? "checked='checked'" : ""); ?> />
 			<?php
 		}
 		elseif (isset($field['cast']) && ($field['cast'] === 'int' || $field['cast'] === 'string'))
 		{
 			?>
-			<input type="text" name="<?php echo htmlspecialchars($input_name); ?>" value="<?php echo htmlspecialchars($value); ?>" />
+			<input type="text" class='field-name-holder' <?php echo ($template ? '' : "name='" . htmlspecialchars($input_name) . "'"); ?> value="<?php echo htmlspecialchars($value); ?>" />
 			<?php
 		}
 		elseif (isset($field['cast']) && $field['cast'] === 'option')
 		{
 			?>
-			<select name="<?php echo htmlspecialchars($input_name); ?>">
+			<select class='field-name-holder' <?php echo ($template ? '' : "name='" . htmlspecialchars($input_name) . "'"); ?>>
 				<option value="">--</option>
 				<?php foreach ($field['option_values'] as $key => $desc) { ?>
 					<option value="<?php echo htmlspecialchars($key); ?>" <?php echo ($key === $value ? "selected='selected'" : ""); ?>><?php echo htmlentities($desc); ?></option>
@@ -156,10 +172,9 @@ class CustomPostManager extends BasePluginMixin
 		else
 		{
 			?>
-			<input type="text" name="<?php echo htmlspecialchars($input_name); ?>" value="<?php echo htmlspecialchars($value); ?>" />
+			<input type="text" class='field-name-holder' <?php echo ($template ? '' : "name='" . htmlspecialchars($input_name) . "'"); ?> value="<?php echo htmlspecialchars($value); ?>" />
 			<?php
 		}
-		echo "</div>";
 	}
 
 	public function get_custom_post_class_by_post_type($post_type)

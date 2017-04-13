@@ -55,7 +55,7 @@ class AjaxGatewayManager extends BasePluginMixin
 	{
 		wp_enqueue_script('jquery');
 
-		wp_enqueue_script('cinnabar-ajax-helper', $this->app->plugin_url('/Cinnabar/mixins/AjaxGatewayManager/include.js'));
+		wp_enqueue_script('cinnabar-ajax-helper', $this->app->plugin_url('/Cinnabar/mixins/AjaxGatewayManager/cinnabar-ajax-helper.js'));
 		$ajax_helper_args = array(
 			'ajaxurl' => admin_url('admin-ajax.php'),
 			'nonce' => wp_create_nonce('cinnabar-ajax-nonce'),
