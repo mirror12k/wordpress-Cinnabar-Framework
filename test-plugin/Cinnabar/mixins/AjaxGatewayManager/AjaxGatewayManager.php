@@ -14,6 +14,7 @@ class AjaxGatewayManager extends BasePluginMixin
 		add_action('wp_ajax_cinnabar_ajax_action', array($this, 'cinnabar_action_gateway'));
 		add_action('wp_ajax_nopriv_cinnabar_ajax_action', array($this, 'cinnabar_action_gateway'));
 		add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
+		add_action('admin_enqueue_scripts', array($this, 'enqueue_scripts'));
 	}
 
 	public function register()

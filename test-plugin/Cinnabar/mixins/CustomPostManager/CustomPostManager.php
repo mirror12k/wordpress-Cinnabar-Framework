@@ -13,6 +13,7 @@ class CustomPostManager extends BasePluginMixin
 	public function register_custom_post_type($class)
 	{
 		$this->registered_custom_posts[] = $class;
+		// $class::$manager = $this;
 	}
 
 	public function load_hooks()
@@ -31,16 +32,51 @@ class CustomPostManager extends BasePluginMixin
 
 	public function wordpress_add_meta_boxes($post_type, $post)
 	{
+		$self = $this;
 		$class = $this->get_custom_post_class_by_post_type($post_type);
 		if (isset($class))
-			add_meta_box(
-				$class::$config['post_type'] . '-config',
-				__( 'Extended Fields', $class::$config['post_type']),
-				array($this, 'render_meta_boxes'),
-				$class::$config['post_type'],
-				'normal',
-				'default'
-			);
+		{
+			if (isset($class::$config['field_groups']))
+			{
+				foreach ($class::$config['field_groups'] as $tag => $field_group)
+				{
+					add_meta_box(
+						$class::$config['post_type'] . '-' . $tag . '-config',
+						__( $field_group['title'], $class::$config['post_type']),
+						function ($post) use ($self, $class, $field_group) {
+							$post = $class::from_post($post);
+
+							if (isset($field_group['render_callback']))
+							{
+								$callback = $field_group['render_callback'];
+								$callback($self, $post, $field_group);
+							}
+							else
+							{
+								$self->render_meta_boxes($post, $class, $field_group);
+							}
+						},
+						$class::$config['post_type'],
+						'normal',
+						'default'
+					);
+
+				}
+			}
+			else
+			{
+				add_meta_box(
+					$class::$config['post_type'] . '-config',
+					__( 'Extended Fields', $class::$config['post_type']),
+					function ($post) use ($self) {
+						$self->render_meta_boxes($post, $class);
+					},
+					$class::$config['post_type'],
+					'normal',
+					'default'
+				);
+			}
+		}
 	}
 
 	public function wordpress_save_post($post_id, $post)
@@ -83,18 +119,24 @@ class CustomPostManager extends BasePluginMixin
 		return $url;
 	}
 
-	public function render_meta_boxes($post)
+	public function render_meta_boxes($post, $class, $field_group=null)
 	{
-		$class = $this->get_custom_post_class_by_post_type($post->post_type);
-		if (!isset($class))
-			return;
-
-		$post = $class::from_post($post);
-
 		echo '<table class="form-table">';
 
-		foreach ($class::$config['fields'] as $name => $field)
+		if ($field_group === null)
 		{
+			$fields_list = array_keys($class::$config['fields']);
+		}
+		else
+		{
+			$fields_list = $field_group['fields'];
+		}
+
+		// foreach ($class::$config['fields'] as $name => $field)
+		foreach ($fields_list as $name)
+		{
+			$field = $class::$config['fields'][$name];
+
 			if (isset($field['description']))
 				$description = $field['description'];
 			else

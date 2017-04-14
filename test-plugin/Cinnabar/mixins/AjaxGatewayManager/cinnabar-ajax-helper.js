@@ -57,20 +57,20 @@ function cinnabar_ajax_action (action, action_data, cb) {
 	});
 }
 
-function collect_action_form_data(form) {
+function collect_action_form_data(action_form) {
 	var data = {};
-	jQuery(form).find("input").each(function () {
+	jQuery(action_form).find("input").each(function () {
 		var input = jQuery(this);
 		if (input.attr('type') === 'checkbox')
 			data[input.attr("name")] = input.prop("checked");
 		else
 			data[input.attr("name")] = input.attr("value");
 	});
-	jQuery(form).find("select").each(function () {
+	jQuery(action_form).find("select").each(function () {
 		var input = jQuery(this);
 		data[input.attr("name")] = input.attr("value");
 	});
-	jQuery(form).find("textarea").each(function () {
+	jQuery(action_form).find("textarea").each(function () {
 		var input = jQuery(this);
 		data[input.attr("name")] = input.attr("value");
 	});
@@ -82,37 +82,40 @@ var cinnabar_action_hooks = {};
 jQuery(function ($) {
 
 	// hook action forms
-	$("form.cinnabar_action_form").each(function () {
-		var elm = this;
+	$(".cinnabar_action_form").each(function () {
+		var action_form = this;
 		// hijack submission to perform cinnabar ajax action
-		$(this).submit(function (e) {
+		var callback = function (e) {
 			e.preventDefault();
+			e.stopPropagation();
 			
-			var action = elm.getAttribute("data-ajax-action");
+			var action = action_form.getAttribute("data-ajax-action");
 
 			var hook = {};
 			if (cinnabar_action_hooks[action])
 				hook = cinnabar_action_hooks[action];
 
 			if (hook.on_request)
-				hook.on_request(elm);
+				hook.on_request(action_form);
 
-			var form_data = collect_action_form_data(elm);
+			var form_data = collect_action_form_data(action_form);
 			if (hook.confirm_action === undefined || window.confirm(hook.confirm_action)) {
 				cinnabar_ajax_action(
-					page,
 					action,
 					form_data,
 					function (data) {
 						if (data.status === 'success' && hook.on_success)
-							hook.on_success(elm, data);
+							hook.on_success(action_form, data);
 						else if (data.status === 'error' && hook.on_error)
-							hook.on_error(elm, data);
+							hook.on_error(action_form, data);
 					}
 				);
 			} else {
 			}
-		});
+		};
+
+		$(this).find('.submitter').click(callback);
+		$(this).submit(callback);
 	});
 
 });

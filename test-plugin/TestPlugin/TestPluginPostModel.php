@@ -38,11 +38,39 @@ class TestPluginPostModel extends CustomPostModel
 				'cast' => 'int',
 			),
 		),
+		'field_groups' => array(
+			'actions' => array(
+				// 'fields' => array('my_custom_field'),
+				'title' => 'My Actions',
+				'render_callback' => array('TestPluginPostModel', 'render_actions'),
+			),
+			'fields' => array(
+				'fields' => array('my_custom_field', 'my_custom_bool', 'my_custom_int', 'my_custom_string', 'my_custom_option', 'my_custom_json', 'my_custom_int_array'),
+				'title' => 'Properties',
+				// 'render_callback' => array('TestPluginPostModel', 'render_actions'),
+			),
+		),
 	);
 
 	public static function custom_url($post)
 	{
 		return site_url() . '/test_post_view/' . $post->id;
+	}
+
+	public static function render_actions($cpm, $post, $field_group)
+	{
+
+		?>
+		<table class="form-table">
+		<h1>Hello World!</h1>
+
+		<div class="cinnabar_action_form" data-ajax-action="test-post-callback">
+			<input type="hidden" name="postid" value="<?php echo htmlspecialchars($post->id); ?>" />
+			<button class="frm_button submitter">Awesome Callback</button>
+		</div>
+
+		</table>
+		<?php
 	}
 }
 

@@ -78,6 +78,13 @@ class TestPlugin extends Cinnabar\BasePlugin
 					'asdf' => array('cast_int'),
 				),
 			),
+			'test-post-callback' => array(
+				'callback' => array($this, 'test_post_callback'),
+				'validate' => array(
+					'current_user' => array('is_logged_in_validator'),
+					'postid' => array('cast_int'),
+				),
+			),
 		));
 
 		$this->CustomPostManager->register_custom_post_type('TestPluginPostModel');
@@ -148,6 +155,17 @@ class TestPlugin extends Cinnabar\BasePlugin
 	{
 		error_log("hello world from ajax!");
 		return array('status' => 'success', 'data' => 'hello world from ajax gateway! i got an arg: ' . $args["asdf"]);
+	}
+
+	public function test_post_callback($args)
+	{
+		error_log("got test_post_callback!");
+
+		$post = TestPluginPostModel::get_by_id($args['postid']);
+		error_log("debug: postid: " . $args['postid'] . ", post: " . json_encode($post));
+		$post->my_custom_field = implode('*', str_split($post->my_custom_field));
+
+		return array('status' => 'success', 'action' => 'refresh');
 	}
 }
 

@@ -7,19 +7,29 @@ class CustomPostModel
 	// public static $config = array(
 	// 	'post_type' => 'my_custom_post',
 	// 	'slug_prefix' => '',
-	// 	// 'custom_url_callback' => array('MyCustomPostModel', 'custom_url'),
+	// 	// 'custom_url_callback' => <callback>,
 	// 	'fields' => array(
 	// 		'my_custom_field' => array(
 	// 			'type' => 'meta',
+	// 			// 'cast' => 'int',
 	// 			// 'description' => 'my custom field #2',
 	// 		),
 	// 	),
+
 	// 	// 'custom_cast_types' => array(
 	// 	// 	'my_cast' => array(
-	// 	// 		'from_string' => 'callback',
-	// 	// 		'to_string' => 'callback',
+	// 	// 		'from_string' => <callback>,
+	// 	// 		'to_string' => <callback>,
 	// 	// 	),
-	// 	// )
+	// 	// ),
+
+	// 	// 'field_groups' => array(
+	// 	// 	'tag' => array(
+	// 	// 		'fields' => array('my_custom_field'),
+	// 	// 		'title' => 'My Favorite Fields',
+	// 	// 		// 'render_callback' => <callback>,
+	// 	// 	)
+	// 	// ),
 	// );
 
 	public static $default_wordpress_fields = array(
@@ -249,6 +259,60 @@ class CustomPostModel
 			return static::from_post($query->post);
 		else
 			return null;
+	}
+
+	public static function create($args)
+	{
+		$post_args = array();
+		$meta_args = array();
+		foreach ($args as $name => $value)
+			if (isset(CustomPostModel::$default_wordpress_fields[$name]))
+				$post_args[CustomPostModel::$default_wordpress_fields[$name]] = $value;
+			elseif (isset(static::$config['fields'][$name]))
+			{
+				// cast but don't save the value to make sure that it won't error AFTER we create the post
+				if (isset(static::$config['fields'][$name]['cast']))
+					static::cast_value_to_string(static::$config['fields'][$name]['cast'], $value, static::$config['fields'][$name]);
+				$meta_args[$name] = $value;
+			}
+			else
+				throw new \Exception("invalid CPM create argument: $name, for object type " . static::$config['post_type']);
+
+		if (isset(static::$config['default_post_args']))
+			foreach (static::$config['default_post_args'] as $name => $value)
+				if (isset(CustomPostModel::$default_wordpress_fields[$name]))
+					$post_args[CustomPostModel::$default_wordpress_fields[$name]] = $value;
+				else
+					throw new \Exception("invalid default post argument '$name', for object type " . static::$config['post_type']);
+
+
+
+		$post_args['post_type'] = static::$config['post_type'];
+		$post_args['post_name'] = (isset($args['slug']) ? static::$config['slug_prefix'] . $args['slug'] : static::$config['slug_prefix'] . '-default');
+		if (!isset($post_args['post_status']))
+			$post_args['post_status'] = 'publish';
+		if (!isset($post_args['comment_status']))
+			$post_args['comment_status'] = 'closed';
+
+
+		$result = wp_insert_post($post_args, true);
+
+		if (is_wp_error($result))
+			die("error creating " . static::$config['post_type'] . " post: " . $result->get_error_message());
+
+		$postid = $result;
+
+		$post = static::get_by_id($postid);
+
+		foreach ($meta_args as $name => $value)
+			$post->$name = $value;
+
+		// wp_set_object_terms($matchid, $terms, 'tfcl_match_type');
+
+		if (isset(static::$manager))
+			static::$manager->app->do_plugin_action(static::$config['post_type'] . '__created', array($post));
+
+		return $matchid;
 	}
 
 	public static function list_posts($args=array())
