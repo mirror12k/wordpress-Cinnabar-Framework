@@ -16,6 +16,13 @@ WP_SERVER = http://192.168.11.3/wp
 WP_ADMIN = dmin
 WP_ADMIN_PASSWORD = dminpassword
 
+$(PLUGIN_NAME):
+	sh
+		rm -rf $(PLUGIN_NAME)/Cinnabar
+		cp -r Cinnabar $(PLUGIN_NAME)
+		cd $(PLUGIN_NAME)
+		composer install
+
 upload:
 	sftp $(USER):$(PASSWORD)@$(SSH_SERVER)
 		delete $(WP_DIRECTORY)/wp-content/plugins/$(PLUGIN_NAME)
