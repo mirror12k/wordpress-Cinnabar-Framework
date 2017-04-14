@@ -7,7 +7,7 @@ class CustomPostModel
 	// public static $config = array(
 	// 	'post_type' => 'my_custom_post',
 	// 	'slug_prefix' => '',
-	// 	// 'custom_url_callback' => <callback>,
+	// 	// 'custom_url_callback' => <callback>($post),
 	// 	'fields' => array(
 	// 		'my_custom_field' => array(
 	// 			'type' => 'meta',
@@ -18,8 +18,9 @@ class CustomPostModel
 
 	// 	// 'custom_cast_types' => array(
 	// 	// 	'my_cast' => array(
-	// 	// 		'from_string' => <callback>,
-	// 	// 		'to_string' => <callback>,
+	// 	// 		'from_string' => <callback>($value, $field),
+	// 	// 		'to_string' => <callback>($value, $field),
+	// 	// 		'render_input' => <callback>($field, $input_name, $value, $is_template),
 	// 	// 	),
 	// 	// ),
 
@@ -27,7 +28,7 @@ class CustomPostModel
 	// 	// 	'tag' => array(
 	// 	// 		'fields' => array('my_custom_field'),
 	// 	// 		'title' => 'My Favorite Fields',
-	// 	// 		// 'render_callback' => <callback>,
+	// 	// 		// 'render_callback' => <callback>($custom_post_manager, $post, $field_group),
 	// 	// 	)
 	// 	// ),
 	// );

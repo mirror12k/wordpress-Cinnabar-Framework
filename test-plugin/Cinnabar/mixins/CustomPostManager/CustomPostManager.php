@@ -67,7 +67,7 @@ class CustomPostManager extends BasePluginMixin
 			{
 				add_meta_box(
 					$class::$config['post_type'] . '-config',
-					__( 'Extended Fields', $class::$config['post_type']),
+					__( 'Properties', $class::$config['post_type']),
 					function ($post) use ($self) {
 						$self->render_meta_boxes($post, $class);
 					},
@@ -152,7 +152,7 @@ class CustomPostManager extends BasePluginMixin
 				<?php
 					if ($field['type'] === 'meta')
 					{
-						$this->render_meta_input($field, $name, $value);
+						$this->render_meta_input($class, $field, $name, $value);
 					}
 					elseif ($field['type'] === 'meta-array')
 					{
@@ -161,7 +161,7 @@ class CustomPostManager extends BasePluginMixin
 						echo "<div data-field-name='" . htmlspecialchars($name) . "' class='cpm-input-array'>";
 						echo "<div class='cpm-input-array-template' style='display: none;'>";
 						echo "<div class='cpm-input-array-field'>";
-						$this->render_meta_input($field, '', '', true);
+						$this->render_meta_input($class, $field, '', '', true);
 						echo "<button type='button' class='cpm-input-array-remove-button'>X</button>";
 						echo "</div>";
 						echo "</div>";
@@ -170,7 +170,7 @@ class CustomPostManager extends BasePluginMixin
 							foreach (range(0, count($value_array) - 1) as $i)
 							{
 								echo "<div class='cpm-input-array-field'>";
-								$this->render_meta_input($field, $name . '[' . $i . ']', $value_array[$i]);
+								$this->render_meta_input($class, $field, $name . '[' . $i . ']', $value_array[$i]);
 								echo "<button type='button' class='cpm-input-array-remove-button'>X</button>";
 								echo "</div>";
 							}
@@ -188,24 +188,24 @@ class CustomPostManager extends BasePluginMixin
 		echo '</table>';
 	}
 
-	public function render_meta_input($field, $input_name, $value, $template=false)
+	public function render_meta_input($class, $field, $input_name, $value, $is_template=false)
 	{
 		if (isset($field['cast']) && $field['cast'] === 'bool')
 		{
 			?>
-			<input type='checkbox' class='field-name-holder' <?php echo ($template ? '' : "name='" . htmlspecialchars($input_name) . "'"); ?> value='1' <?php echo (1 == $value ? "checked='checked'" : ""); ?> />
+			<input type='checkbox' class='field-name-holder' <?php echo ($is_template ? '' : "name='" . htmlspecialchars($input_name) . "'"); ?> value='1' <?php echo (1 == $value ? "checked='checked'" : ""); ?> />
 			<?php
 		}
 		elseif (isset($field['cast']) && ($field['cast'] === 'int' || $field['cast'] === 'string'))
 		{
 			?>
-			<input type="text" class='field-name-holder' <?php echo ($template ? '' : "name='" . htmlspecialchars($input_name) . "'"); ?> value="<?php echo htmlspecialchars($value); ?>" />
+			<input type="text" class='field-name-holder' <?php echo ($is_template ? '' : "name='" . htmlspecialchars($input_name) . "'"); ?> value="<?php echo htmlspecialchars($value); ?>" />
 			<?php
 		}
 		elseif (isset($field['cast']) && $field['cast'] === 'option')
 		{
 			?>
-			<select class='field-name-holder' <?php echo ($template ? '' : "name='" . htmlspecialchars($input_name) . "'"); ?>>
+			<select class='field-name-holder' <?php echo ($is_template ? '' : "name='" . htmlspecialchars($input_name) . "'"); ?>>
 				<option value="">--</option>
 				<?php foreach ($field['option_values'] as $key => $desc) { ?>
 					<option value="<?php echo htmlspecialchars($key); ?>" <?php echo ($key === $value ? "selected='selected'" : ""); ?>><?php echo htmlentities($desc); ?></option>
@@ -213,10 +213,15 @@ class CustomPostManager extends BasePluginMixin
 			</select>
 			<?php
 		}
+		elseif (isset($field['cast']) && isset($class::$config['custom_cast_types']) && isset($class::$config['custom_cast_types'][$field['cast']]))
+		{
+			$callback = $class::$config['custom_cast_types'][$field['cast']]['render_input'];
+			$callback($field, $input_name, $value, $is_template);
+		}
 		else
 		{
 			?>
-			<input type="text" class='field-name-holder' <?php echo ($template ? '' : "name='" . htmlspecialchars($input_name) . "'"); ?> value="<?php echo htmlspecialchars($value); ?>" />
+			<input type="text" class='field-name-holder' <?php echo ($is_template ? '' : "name='" . htmlspecialchars($input_name) . "'"); ?> value="<?php echo htmlspecialchars($value); ?>" />
 			<?php
 		}
 	}
