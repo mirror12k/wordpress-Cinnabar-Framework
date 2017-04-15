@@ -162,7 +162,7 @@ class TestPlugin extends Cinnabar\BasePlugin
 		error_log("got test_post_callback!");
 
 		$post = TestPluginPostModel::get_by_id($args['postid']);
-		error_log("debug: postid: " . $args['postid'] . ", post: " . json_encode($post));
+		// error_log("debug: postid: " . $args['postid'] . ", post: " . json_encode($post));
 		$post->my_custom_field = implode('*', str_split($post->my_custom_field));
 
 		return array('status' => 'success', 'action' => 'refresh');

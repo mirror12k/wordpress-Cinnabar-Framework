@@ -99,7 +99,7 @@ class CustomPostManager extends BasePluginMixin
 			$post = $class::from_post($post);
 			foreach ($class::$config['fields'] as $name => $field)
 			{
-				error_log("got value for $name: " . json_encode($_POST[$name]));
+				// error_log("got value for $name: " . json_encode($_POST[$name]));
 				$post->$name = $_POST[$name];
 			}
 		}

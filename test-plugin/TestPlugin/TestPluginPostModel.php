@@ -2,7 +2,7 @@
 
 
 
-class TestPluginPostModel extends CustomPostModel
+class TestPluginPostModel extends Cinnabar\CustomPostModel
 {
 	public static $config = array(
 		'post_type' => 'test_plugin_post',

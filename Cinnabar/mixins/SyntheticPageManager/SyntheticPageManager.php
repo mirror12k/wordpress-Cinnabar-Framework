@@ -45,6 +45,9 @@ class SyntheticPageManager extends BasePluginMixin
 
 	public function register()
 	{
+		global $synthetic_manager;
+		$synthetic_manager = $this;
+		
 		$this->register_synthetic_page_post_type();
 	}
 

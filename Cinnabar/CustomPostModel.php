@@ -2,6 +2,8 @@
 
 
 
+namespace Cinnabar
+
 class CustomPostModel
 {
 	// public static $config = array(
@@ -33,7 +35,7 @@ class CustomPostModel
 	// 	// ),
 	// );
 
-	public static $default_wordpress_fields = array(
+	public static $default_wordpress_post_fields = array(
 		'id' => 'ID',
 		'author' => 'post_author',
 		'parent' => 'post_parent',
@@ -63,16 +65,16 @@ class CustomPostModel
 
 	public function __isset($name)
 	{
-		return array_key_exists($name, CustomPostModel::$default_wordpress_fields)
+		return array_key_exists($name, static::$default_wordpress_post_fields)
 				|| $name === 'url'
 				|| array_key_exists($name, static::$config['fields']);
 	}
 
 	public function __get($name)
 	{
-		if (isset(CustomPostModel::$default_wordpress_fields[$name]))
+		if (isset(static::$default_wordpress_post_fields[$name]))
 		{
-			$field = CustomPostModel::$default_wordpress_fields[$name];
+			$field = static::$default_wordpress_post_fields[$name];
 			return $this->post->$field;
 		}
 		elseif ($name === 'url')
@@ -113,9 +115,9 @@ class CustomPostModel
 
 	public function __set($name, $value)
 	{
-		if (isset(CustomPostModel::$default_wordpress_fields[$name]))
+		if (isset(static::$default_wordpress_post_fields[$name]))
 		{
-			$field = CustomPostModel::$default_wordpress_fields[$name];
+			$field = static::$default_wordpress_post_fields[$name];
 			$this->post->$field = $value;
 		}
 		elseif (isset(static::$config['fields'][$name]))
@@ -267,8 +269,8 @@ class CustomPostModel
 		$post_args = array();
 		$meta_args = array();
 		foreach ($args as $name => $value)
-			if (isset(CustomPostModel::$default_wordpress_fields[$name]))
-				$post_args[CustomPostModel::$default_wordpress_fields[$name]] = $value;
+			if (isset(static::$default_wordpress_post_fields[$name]))
+				$post_args[static::$default_wordpress_post_fields[$name]] = $value;
 			elseif (isset(static::$config['fields'][$name]))
 			{
 				// cast but don't save the value to make sure that it won't error AFTER we create the post
@@ -281,8 +283,8 @@ class CustomPostModel
 
 		if (isset(static::$config['default_post_args']))
 			foreach (static::$config['default_post_args'] as $name => $value)
-				if (isset(CustomPostModel::$default_wordpress_fields[$name]))
-					$post_args[CustomPostModel::$default_wordpress_fields[$name]] = $value;
+				if (isset(static::$default_wordpress_post_fields[$name]))
+					$post_args[static::$default_wordpress_post_fields[$name]] = $value;
 				else
 					throw new \Exception("invalid default post argument '$name', for object type " . static::$config['post_type']);
 
