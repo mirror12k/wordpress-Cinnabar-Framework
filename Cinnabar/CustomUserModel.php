@@ -228,7 +228,7 @@ class CustomUserModel
 	public static function get_by_id($userid)
 	{
 		$userdata = get_user_by('id', (int)$userid);
-		if ($userdata !== false)
+		if ($userdata === false)
 			return null;
 		if (!static::is_user_of_type($userid))
 			return null;

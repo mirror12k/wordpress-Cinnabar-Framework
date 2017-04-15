@@ -16,6 +16,12 @@ class TestPluginUserModel extends Cinnabar\CustomUserModel
 				// 'default' => '15',
 				// 'description' => 'my custom field #2',
 			),
+			'my_custom_user_array_field' => array(
+				'type' => 'meta-array',
+				'cast' => 'int',
+				// 'default' => '15',
+				// 'description' => 'my custom field #2',
+			),
 		),
 
 		// 'custom_cast_types' => array(

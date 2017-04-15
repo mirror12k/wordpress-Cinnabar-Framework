@@ -78,6 +78,20 @@ class CustomUserManager extends BasePluginMixin
 		elseif (in_array($new_user_type, $this->registered_custom_users))
 			update_usermeta($user_id, 'custom_user_model__user_type', $new_user_type::$config['user_type']);
 
+		$custom_user_type = CustomUserModel::get_user_type($user_id);
+		$class = $this->get_custom_user_class_by_user_type($custom_user_type);
+		if (isset($custom_user_type) && isset($class))
+		{
+			$user = $class::get_by_id($user_id);
+			if ($user === null)
+				die("user is null");
+			foreach ($class::$config['fields'] as $name => $field)
+			{
+				error_log("got value for $name: " . json_encode($_POST[$name]));
+				$user->$name = $_POST[$name];
+			}
+		}
+
 	}
 
 	public function render_meta_fields($user, $class, $field_group=null)
@@ -192,6 +206,9 @@ class CustomUserManager extends BasePluginMixin
 
 	public function get_custom_user_class_by_user_type($user_type)
 	{
+		if (!isset($user_type))
+			return;
+
 		foreach ($this->registered_custom_users as $class)
 			if ($class::$config['user_type'] === $user_type)
 				return $class;
