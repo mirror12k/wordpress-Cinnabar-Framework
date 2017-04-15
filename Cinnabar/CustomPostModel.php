@@ -2,7 +2,7 @@
 
 
 
-namespace Cinnabar
+namespace Cinnabar;
 
 class CustomPostModel
 {
@@ -10,6 +10,7 @@ class CustomPostModel
 	// 	'post_type' => 'my_custom_post',
 	// 	'slug_prefix' => '',
 	// 	// 'custom_url_callback' => <callback>($post),
+	
 	// 	'fields' => array(
 	// 		'my_custom_field' => array(
 	// 			'type' => 'meta',

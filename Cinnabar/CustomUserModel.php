@@ -2,7 +2,7 @@
 
 
 
-namespace Cinnabar
+namespace Cinnabar;
 
 class CustomUserModel
 {
@@ -10,6 +10,23 @@ class CustomUserModel
 	// 	'user_type' => 'my_custom_user_type',
 	// 	'slug_prefix' => '',
 	// 	'default_role' => 'Subscriber',
+
+	// 	'fields' => array(
+	// 		'my_custom_field' => array(
+	// 			'type' => 'meta',
+	// 			// 'cast' => 'int',
+	// 			// 'default' => '15',
+	// 			// 'description' => 'my custom field #2',
+	// 		),
+	// 	),
+
+	// 	// 'custom_cast_types' => array(
+	// 	// 	'my_cast' => array(
+	// 	// 		'from_string' => <callback>($value, $field),
+	// 	// 		'to_string' => <callback>($value, $field),
+	// 	// 		'render_input' => <callback>($field, $input_name, $value, $is_template),
+	// 	// 	),
+	// 	// ),
 	// );
 
 	public static $default_wordpress_user_fields = array(
@@ -190,9 +207,14 @@ class CustomUserModel
 		return new static($userdata);
 	}
 
+	public static function get_user_type($userid)
+	{
+		return get_user_meta((int)$userid, 'custom_user_model__user_type', true);
+	}
+
 	public static function is_user_of_type($userid)
 	{
-		return static::$config['user_type'] === get_user_meta((int)$userid, 'custom_user_model__user_type', true);
+		return static::$config['user_type'] === static::get_user_type($userid);
 	}
 
 	public static function get_by_id($userid)

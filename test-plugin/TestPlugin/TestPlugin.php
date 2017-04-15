@@ -4,6 +4,7 @@
 
 
 require_once 'TestPluginPostModel.php';
+require_once 'TestPluginUserModel.php';
 require_once 'TestPostViewController.php';
 require_once 'TestViewController.php';
 
@@ -17,6 +18,8 @@ class TestPlugin extends Cinnabar\BasePlugin
 		'EmailManager' => 'Cinnabar\\EmailManager',
 		'AjaxGatewayManager' => 'Cinnabar\\AjaxGatewayManager',
 		'CustomPostManager' => 'Cinnabar\\CustomPostManager',
+		'CustomUserManager' => 'Cinnabar\\CustomUserManager',
+		'RoleManager' => 'Cinnabar\\RoleManager',
 	);
 
 	// required for UpdateTriggerManager
@@ -88,11 +91,32 @@ class TestPlugin extends Cinnabar\BasePlugin
 		));
 
 		$this->CustomPostManager->register_custom_post_type('TestPluginPostModel');
+		$this->CustomUserManager->register_custom_user_type('TestPluginUserModel');
 
 		$this->UpdateTriggerManager->on_plugin_version('0.0.2', array($this, 'hello_world'));
 
 		$this->register_test_plugin_post_type();
 	}
+	public function show_custom_user_profile_fields($user)
+	{
+		error_log("debug show_custom_user_profile_fields");
+		?>
+		<h1>Hello world! you are <?php echo htmlentities($user->user_nicename); ?></h1>
+
+<!-- 		<table class="form-table">
+		<tr>
+		<th>
+		<label for="address"><?php _e('Address', 'your_textdomain'); ?>
+		</label></th>
+		<td>
+		<input type="text" name="address" id="address" value="<?php echo esc_attr( get_the_author_meta( 'address', $user->ID ) ); ?>" class="regular-text" /><br />
+		<span class="description"><?php _e('Please enter your address.', 'your_textdomain'); ?></span>
+		</td>
+		</tr>
+		</table> -->
+		<?php
+	}
+
 
 	public function register_test_plugin_post_type()
 	{
