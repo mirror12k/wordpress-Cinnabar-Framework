@@ -14,6 +14,7 @@ class CustomPostModel
 	// 		'my_custom_field' => array(
 	// 			'type' => 'meta',
 	// 			// 'cast' => 'int',
+	// 			// 'default' => '15',
 	// 			// 'description' => 'my custom field #2',
 	// 		),
 	// 	),
@@ -268,9 +269,13 @@ class CustomPostModel
 	{
 		$post_args = array();
 		$meta_args = array();
+
+		// parse the given args into post_args and meta_args
 		foreach ($args as $name => $value)
+			// post arg
 			if (isset(static::$default_wordpress_post_fields[$name]))
 				$post_args[static::$default_wordpress_post_fields[$name]] = $value;
+			// meta arg
 			elseif (isset(static::$config['fields'][$name]))
 			{
 				// cast but don't save the value to make sure that it won't error AFTER we create the post
@@ -281,6 +286,7 @@ class CustomPostModel
 			else
 				throw new \Exception("invalid CPM create argument: $name, for object type " . static::$config['post_type']);
 
+		// set any defaults for basic post args
 		if (isset(static::$config['default_post_args']))
 			foreach (static::$config['default_post_args'] as $name => $value)
 				if (isset(static::$default_wordpress_post_fields[$name]))
@@ -288,8 +294,12 @@ class CustomPostModel
 				else
 					throw new \Exception("invalid default post argument '$name', for object type " . static::$config['post_type']);
 
+		// set any defaults for meta fields
+		foreach (static::$config['fields'] as $name => $field)
+			if (isset($field['default']) && !isset($meta_args[$name]))
+				$meta_args[$name] = $field['default'];
 
-
+		// set a few necessary perliminaries
 		$post_args['post_type'] = static::$config['post_type'];
 		$post_args['post_name'] = (isset($args['slug']) ? static::$config['slug_prefix'] . $args['slug'] : static::$config['slug_prefix'] . '-default');
 		if (!isset($post_args['post_status']))
@@ -297,25 +307,21 @@ class CustomPostModel
 		if (!isset($post_args['comment_status']))
 			$post_args['comment_status'] = 'closed';
 
-
+		// create the post
 		$result = wp_insert_post($post_args, true);
-
 		if (is_wp_error($result))
 			die("error creating " . static::$config['post_type'] . " post: " . $result->get_error_message());
 
 		$postid = $result;
-
 		$post = static::get_by_id($postid);
 
+		// set meta fields
 		foreach ($meta_args as $name => $value)
 			$post->$name = $value;
 
 		// wp_set_object_terms($matchid, $terms, 'tfcl_match_type');
 
-		if (isset(static::$manager))
-			static::$manager->app->do_plugin_action(static::$config['post_type'] . '__created', array($post));
-
-		return $matchid;
+		return $post;
 	}
 
 	public static function list_posts($args=array())

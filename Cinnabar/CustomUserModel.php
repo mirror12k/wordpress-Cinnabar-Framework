@@ -222,9 +222,13 @@ class CustomUserModel
 	{
 		$user_args = array();
 		$meta_args = array();
+
+		// parse the args into user_args and meta_args
 		foreach ($args as $name => $value)
+			// userdata arg
 			if (isset(static::$default_wordpress_user_fields[$name]))
 				$user_args[static::$default_wordpress_user_fields[$name]] = $value;
+			// meta arg
 			elseif (isset(static::$config['fields'][$name]))
 			{
 				// cast but don't save the value to make sure that it won't error AFTER we create the post
@@ -235,26 +239,42 @@ class CustomUserModel
 			else
 				throw new \Exception("invalid CPM create argument: $name, for user type " . static::$config['user_type']);
 
+		// set any defaults for basic user args
+		if (isset(static::$config['default_user_args']))
+			foreach (static::$config['default_user_args'] as $name => $value)
+				if (isset(static::$default_wordpress_user_fields[$name]))
+					$post_args[static::$default_wordpress_user_fields[$name]] = $value;
+				else
+					throw new \Exception("invalid default post argument '$name', for user type " . static::$config['user_type']);
+
+		// set any defaults for meta fields
+		foreach (static::$config['fields'] as $name => $field)
+			if (isset($field['default']) && !isset($meta_args[$name]))
+				$meta_args[$name] = $field['default'];
+
+		// set a few necessary defaults
 		$user_args['user_nicename'] = (isset($args['slug']) ? static::$config['slug_prefix'] . $args['slug'] : static::$config['slug_prefix'] . '-default');
 		if (!isset($user_args['user_pass']))
 			$user_args['user_pass'] = wp_generate_password(20, true);
 		if (!isset($user_args['role']))
 			$user_args['role'] = static::$config['default_role'];
 
-
+		// create the user
 		$result = wp_insert_user($user_args);
-
 		if (is_wp_error($result))
 			die("error creating " . static::$config['user_type'] . " user: " . $result->get_error_message());
 
 		$userid = $result;
-
 		$user = static::get_by_id($userid);
 
+		// mark him as a user of this custom model type
 		update_user_meta((int)$userid, 'custom_user_model__user_type', static::$config['user_type']);
 
+		// set meta fields
 		foreach ($meta_args as $name => $value)
 			$user->$name = $value;
+
+		return $user;
 	}
 
 }
