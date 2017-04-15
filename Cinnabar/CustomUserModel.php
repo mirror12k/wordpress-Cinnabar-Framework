@@ -27,6 +27,14 @@ class CustomUserModel
 	// 	// 		'render_input' => <callback>($field, $input_name, $value, $is_template),
 	// 	// 	),
 	// 	// ),
+
+	// 	// 'field_groups' => array(
+	// 	// 	'tag' => array(
+	// 	// 		'fields' => array('my_custom_field'),
+	// 	// 		'title' => 'My Favorite Fields',
+	// 	// 		// 'render_callback' => <callback>($custom_user_manager, $user, $field_group),
+	// 	// 	)
+	// 	// ),
 	// );
 
 	public static $default_wordpress_user_fields = array(

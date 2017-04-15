@@ -68,6 +68,7 @@ class CustomPostManager extends BasePluginMixin
 					$class::$config['post_type'] . '-config',
 					__( 'Properties', $class::$config['post_type']),
 					function ($post) use ($self) {
+						$post = $class::from_post($post);
 						$self->render_meta_boxes($post, $class);
 					},
 					$class::$config['post_type'],
