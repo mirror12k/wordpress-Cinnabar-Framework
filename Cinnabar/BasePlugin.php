@@ -18,6 +18,10 @@ class BasePlugin
 	public $plugin_options = array();
 	public $default_plugin_options = array();
 
+	public $global_scripts = array();
+	public $global_style_sheets = array();
+
+
 	// entry point, must be called at the start of the plugin to load the application functionality
 	public function load_plugin()
 	{
@@ -28,6 +32,30 @@ class BasePlugin
 		$this->load_hooks();
 		$this->mixins_load_hooks();
 	}
+
+
+	// mixin api
+	public function register_plugin_options($new_options)
+	{
+		foreach ($new_options as $section => $section_data)
+			if (isset($this->plugin_options[$section]))
+				throw new \Exception("redefinition of plugin options section '$section'");
+			else
+				$this->plugin_options[$section] = $section_data;
+	}
+
+	public function register_global_scripts($scripts)
+	{
+		foreach ($scripts as $name => $script)
+			$this->global_scripts[$name] = $script;
+	}
+
+	public function register_global_style_sheets($style_sheets)
+	{
+		foreach ($style_sheets as $name => $style_sheet)
+			$this->global_style_sheets[$name] = $style_sheet;
+	}
+
 
 	// baseplugin functionality	
 	public function load_mixins()
@@ -67,6 +95,24 @@ class BasePlugin
 		add_filter("plugin_action_links_" . plugin_basename($this->plugin_dir() . '/' . $this->plugin_name . '.php'), array($this, 'baseplugin_action_links'));
 		add_action('admin_init', array($this, 'baseplugin_add_options'));
 		add_action('admin_menu', array($this, 'baseplugin_add_options_page'));
+
+		// enqueue global scripts and styles
+		add_action('wp_enqueue_scripts', array($this, 'wordpress_enqueue_scripts'));
+	}
+
+	public function wordpress_enqueue_scripts()
+	{
+		foreach ($this->global_scripts as $name => $script)
+		{
+			if ($script !== null)
+				wp_enqueue_script($name, $this->plugin_url('/' . $script));
+			else
+				wp_enqueue_script($name);
+		}
+		foreach ($this->global_style_sheets as $name => $style_sheet)
+		{
+			wp_enqueue_script($name, $this->plugin_url('/' . $style_sheet));
+		}
 	}
 
 	public function load_plugin_options()
@@ -211,16 +257,6 @@ class BasePlugin
 
 	public function wordpress_loaded()
 	{}
-
-	// mixin api
-	public function register_plugin_options($new_options)
-	{
-		foreach ($new_options as $section => $section_data)
-			if (isset($this->plugin_options[$section]))
-				throw new \Exception("redefinition of plugin options section '$section'");
-			else
-				$this->plugin_options[$section] = $section_data;
-	}
 
 	// utility functions
 	public function get_plugin_option($setting)
