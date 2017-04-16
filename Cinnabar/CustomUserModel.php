@@ -86,7 +86,7 @@ class CustomUserModel
 		{
 			if (static::$config['fields'][$name]['type'] === 'meta')
 			{
-				$value = get_user_meta($this->userdata->ID, $name, true);
+				$value = get_user_meta($this->userdata->ID, static::$config['user_type'] . '__' . $name, true);
 
 				if (isset(static::$config['fields'][$name]['cast']))
 					$value = static::cast_value_from_string(static::$config['fields'][$name]['cast'], $value, static::$config['fields'][$name]);
@@ -95,7 +95,7 @@ class CustomUserModel
 			}
 			elseif (static::$config['fields'][$name]['type'] === 'meta-array')
 			{
-				$value_array = get_user_meta($this->userdata->ID, $name, false);
+				$value_array = get_user_meta($this->userdata->ID, static::$config['user_type'] . '__' . $name, false);
 
 				if (isset(static::$config['fields'][$name]['cast']))
 				{
@@ -128,7 +128,7 @@ class CustomUserModel
 				if (isset(static::$config['fields'][$name]['cast']))
 					$value = static::cast_value_to_string(static::$config['fields'][$name]['cast'], $value, static::$config['fields'][$name]);
 
-				update_user_meta($this->userdata->ID, $name, $value);
+				update_user_meta($this->userdata->ID, static::$config['user_type'] . '__' . $name, $value);
 			}
 			elseif (static::$config['fields'][$name]['type'] === 'meta-array')
 			{
@@ -142,10 +142,10 @@ class CustomUserModel
 					$value_array = $cast_array;
 				}
 
-				delete_user_meta($this->userdata->ID, $name);
+				delete_user_meta($this->userdata->ID, static::$config['user_type'] . '__' . $name);
 
 				foreach ($value_array as $value)
-					add_user_meta($this->userdata->ID, $name, $value, false);
+					add_user_meta($this->userdata->ID, static::$config['user_type'] . '__' . $name, $value, false);
 
 				return $value_array;
 			}
@@ -206,6 +206,11 @@ class CustomUserModel
 		}
 		else
 			throw new \Exception("Unknown cast type '$cast_type' requested, from user type " . static::$config['user_type']);
+	}
+
+	public function login_user()
+	{
+		wp_set_auth_cookie($this->id, false, is_ssl());
 	}
 
 

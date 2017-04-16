@@ -10,7 +10,7 @@ class CustomPostModel
 	// 	'post_type' => 'my_custom_post',
 	// 	'slug_prefix' => '',
 	// 	// 'custom_url_callback' => <callback>($post),
-	
+
 	// 	'fields' => array(
 	// 		'my_custom_field' => array(
 	// 			'type' => 'meta',
@@ -87,7 +87,7 @@ class CustomPostModel
 		{
 			if (static::$config['fields'][$name]['type'] === 'meta')
 			{
-				$value = get_post_meta($this->post->ID, $name, true);
+				$value = get_post_meta($this->post->ID, static::$config['post_type'] . '__' . $name, true);
 
 				if (isset(static::$config['fields'][$name]['cast']))
 					$value = static::cast_value_from_string(static::$config['fields'][$name]['cast'], $value, static::$config['fields'][$name]);
@@ -96,7 +96,7 @@ class CustomPostModel
 			}
 			elseif (static::$config['fields'][$name]['type'] === 'meta-array')
 			{
-				$value_array = get_post_meta($this->post->ID, $name, false);
+				$value_array = get_post_meta($this->post->ID, static::$config['post_type'] . '__' . $name, false);
 
 				if (isset(static::$config['fields'][$name]['cast']))
 				{
@@ -129,7 +129,7 @@ class CustomPostModel
 				if (isset(static::$config['fields'][$name]['cast']))
 					$value = static::cast_value_to_string(static::$config['fields'][$name]['cast'], $value, static::$config['fields'][$name]);
 
-				update_post_meta($this->post->ID, $name, $value);
+				update_post_meta($this->post->ID, static::$config['post_type'] . '__' . $name, $value);
 			}
 			elseif (static::$config['fields'][$name]['type'] === 'meta-array')
 			{
@@ -143,10 +143,10 @@ class CustomPostModel
 					$value_array = $cast_array;
 				}
 
-				delete_post_meta($this->post->ID, $name);
+				delete_post_meta($this->post->ID, static::$config['post_type'] . '__' . $name);
 
 				foreach ($value_array as $value)
-					add_post_meta($this->post->ID, $name, $value, false);
+					add_post_meta($this->post->ID, static::$config['post_type'] . '__' . $name, $value, false);
 
 				return $value_array;
 			}
@@ -163,7 +163,7 @@ class CustomPostModel
 		{
 			if (isset(static::$config['fields'][$name]['cast']))
 				$value = static::cast_value_to_string(static::$config['fields'][$name]['cast'], $value, static::$config['fields'][$name]);
-			add_post_meta($this->post->ID, $name, $value, false);
+			add_post_meta($this->post->ID, static::$config['post_type'] . '__' . $name, $value, false);
 		}
 		else
 			throw new \Exception("Attempt to add invalid property value '$name', to object type " . static::$config['post_type']);
@@ -175,7 +175,7 @@ class CustomPostModel
 		{
 			if (isset(static::$config['fields'][$name]['cast']))
 				$value = static::cast_value_to_string(static::$config['fields'][$name]['cast'], $value, static::$config['fields'][$name]);
-			delete_post_meta($this->post->ID, $name, $value);
+			delete_post_meta($this->post->ID, static::$config['post_type'] . '__' . $name, $value);
 		}
 		else
 			throw new \Exception("Attempt to remove invalid property value '$name', to object type " . static::$config['post_type']);

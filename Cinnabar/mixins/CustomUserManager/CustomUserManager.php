@@ -74,9 +74,9 @@ class CustomUserManager extends BasePluginMixin
 
 		$new_user_type = $_POST['custom_user_type'];
 		if ($new_user_type === "")
-			update_usermeta($user_id, 'custom_user_model__user_type', '');
+			update_user_meta($user_id, 'custom_user_model__user_type', '');
 		elseif (in_array($new_user_type, $this->registered_custom_users))
-			update_usermeta($user_id, 'custom_user_model__user_type', $new_user_type::$config['user_type']);
+			update_user_meta($user_id, 'custom_user_model__user_type', $new_user_type::$config['user_type']);
 
 		$custom_user_type = CustomUserModel::get_user_type($user_id);
 		$class = $this->get_custom_user_class_by_user_type($custom_user_type);
