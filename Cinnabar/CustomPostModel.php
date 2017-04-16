@@ -35,6 +35,37 @@ class CustomPostModel
 	// 	// 		// 'render_callback' => <callback>($custom_post_manager, $post, $field_group),
 	// 	// 	)
 	// 	// ),
+
+	// 	'registration_properties' => array(
+	// 		'labels' => array(
+	// 			'name' => __( 'My Special Posts', 'my_custom_post' ),
+	// 			'singular_name' => __( 'My Special Post', 'my_custom_post' ),
+	// 			'add_new' => __( 'Add New', 'my_custom_post' ),
+	// 			'add_new_item' => __( 'Add New My Special Post', 'my_custom_post' ),
+	// 			'edit_item' => __( 'Edit My Special Posts', 'my_custom_post' ),
+	// 			'new_item' => __( 'New My Special Post', 'my_custom_post' ),
+	// 			'view_item' => __( 'View My Special Post', 'my_custom_post' ),
+	// 			'search_items' => __( 'Search My Special Posts', 'my_custom_post' ),
+	// 			'not_found' => __( 'No My Special Posts found', 'my_custom_post' ),
+	// 			'not_found_in_trash' => __( 'No My Special Posts found in Trash', 'my_custom_post' ),
+	// 			'parent_item_colon' => __( 'Parent My Special Post:', 'my_custom_post'),
+	// 			'menu_name' => __( 'My Special Posts', 'my_custom_post' ),
+	// 		),
+	// 		'hierarchical' => false,
+	// 		'description' => __( 'My Special Posts', 'my_custom_post' ),
+	// 		'supports' => array( 'title', 'page-attributes' ),
+	// 		'public' => true,
+	// 		'show_ui' => true,
+	// 		'show_in_menu' => true,
+	// 		// 'show_in_nav_menus' => true,
+	// 		'publicly_queryable' => true,
+	// 		'exclude_from_search' => true,
+	// 		'has_archive' => true,
+	// 		'query_var' => true,
+	// 		'can_export' => true,
+	// 		'rewrite' => true,
+	// 		'capability_type' => 'page'
+	// 	),
 	// );
 
 	public static $default_wordpress_post_fields = array(
@@ -345,6 +376,17 @@ class CustomPostModel
 		$args['posts_per_page'] = $count;
 		
 		return static::list_posts($args);
+	}
+
+	public static function register()
+	{
+		if (isset(static::$config['registration_properties']))
+		{
+			foreach (static::$config['registration_properties']['labels'] as $key => $text)
+				static::$config['registration_properties']['labels'][$key] = __($text, static::$config['post_type']);
+			static::$config['registration_properties']['description'] = __(static::$config['registration_properties']['description'], static::$config['post_type']);
+			register_post_type(static::$config['post_type'], static::$config['registration_properties']);
+		}
 	}
 }
 

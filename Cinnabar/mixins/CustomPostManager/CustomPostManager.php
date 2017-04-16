@@ -13,6 +13,7 @@ class CustomPostManager extends BasePluginMixin
 	public function register_custom_post_type($class)
 	{
 		$this->registered_custom_posts[] = $class;
+		$class::register();
 	}
 
 	public function load_hooks()
@@ -67,7 +68,7 @@ class CustomPostManager extends BasePluginMixin
 				add_meta_box(
 					$class::$config['post_type'] . '-config',
 					__( 'Properties', $class::$config['post_type']),
-					function ($post) use ($self) {
+					function ($post) use ($self, $class) {
 						$post = $class::from_post($post);
 						$self->render_meta_boxes($post, $class);
 					},

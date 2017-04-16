@@ -50,6 +50,36 @@ class TestPluginPostModel extends Cinnabar\CustomPostModel
 				// 'render_callback' => array('TestPluginPostModel', 'render_actions'),
 			),
 		),
+		'registration_properties' => array(
+			'labels' => array(
+				'name' => 'Test Plugin Posts',
+				'singular_name' => 'Test Plugin Post',
+				'add_new' => 'Add New',
+				'add_new_item' => 'Add New Test Plugin Post',
+				'edit_item' => 'Edit Test Plugin Posts',
+				'new_item' => 'New Test Plugin Post',
+				'view_item' => 'View Test Plugin Post',
+				'search_items' => 'Search Test Plugin Posts',
+				'not_found' => 'No Test Plugin Posts found',
+				'not_found_in_trash' => 'No Test Plugin Posts found in Trash',
+				'parent_item_colon' => 'Parent Test Plugin Post:',
+				'menu_name' => 'Test Plugin Posts',
+			),
+			'hierarchical' => false,
+			'description' => 'Test Plugin Posts',
+			'supports' => array( 'title', 'page-attributes' ),
+			'public' => true,
+			'show_ui' => true,
+			'show_in_menu' => true,
+			// 'show_in_nav_menus' => true,
+			'publicly_queryable' => true,
+			'exclude_from_search' => true,
+			'has_archive' => true,
+			'query_var' => true,
+			'can_export' => true,
+			'rewrite' => array('slug' => false),
+			'capability_type' => 'page'
+		),
 	);
 
 	public static function custom_url($post)
