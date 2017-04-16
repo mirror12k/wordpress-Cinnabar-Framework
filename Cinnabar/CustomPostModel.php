@@ -219,7 +219,7 @@ class CustomPostModel
 			throw new \Exception("Attempt to remove invalid property value '$name', to object type " . static::$config['post_type']);
 	}
 
-	public function cast_value_from_string($cast_type, $value, $field)
+	public static function cast_value_from_string($cast_type, $value, $field, $class='')
 	{
 		if ($cast_type === 'bool')
 			return (bool)$value;
@@ -242,7 +242,7 @@ class CustomPostModel
 			throw new \Exception("Unknown cast type '$cast_type' requested, from object type " . static::$config['post_type']);
 	}
 
-	public function cast_value_to_string($cast_type, $value, $field)
+	public static function cast_value_to_string($cast_type, $value, $field)
 	{
 		if ($cast_type === 'bool')
 			return (string)$value;

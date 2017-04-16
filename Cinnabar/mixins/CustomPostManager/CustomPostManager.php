@@ -101,7 +101,25 @@ class CustomPostManager extends BasePluginMixin
 			foreach ($class::$config['fields'] as $name => $field)
 			{
 				// error_log("got value for $name: " . json_encode($_POST[$name]));
-				$post->$name = $_POST[$name];
+				$value = $_POST[$name];
+				if (isset($field['cast']))
+				{
+					if ($field['type'] === 'meta')
+					{
+						$value = $class::cast_value_from_string($field['cast'], $value, $field, $class);
+					}
+					elseif ($field['type'] === 'meta-array')
+					{
+						$value_array = $value;
+						$new_array = array();
+						foreach ($value_array as $value)
+							$new_array[] = $class::cast_value_from_string($field['cast'], $value, $field);
+						$value = $new_array;
+					}
+				}
+
+
+				$post->$name = $value;
 			}
 		}
 	}
@@ -116,7 +134,7 @@ class CustomPostManager extends BasePluginMixin
 				$post = $class::from_post($post);
 				if (isset($post->url))
 				{
-					error_log("got url: $post->url");
+					// error_log("got url: $post->url");
 					return $post->url;
 				}
 			}
