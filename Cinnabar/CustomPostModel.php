@@ -9,7 +9,6 @@ class CustomPostModel
 	// public static $config = array(
 	// 	'post_type' => 'my_custom_post',
 	// 	'slug_prefix' => '',
-	// 	// 'custom_url_callback' => <callback>($post),
 
 	// 	'fields' => array(
 	// 		'my_custom_field' => array(
@@ -18,6 +17,11 @@ class CustomPostModel
 	// 			// 'default' => '15',
 	// 			// 'description' => 'my custom field #2',
 	// 		),
+	// 	),
+
+	// 	'virtual_fields' => array(
+	// 		// 'url' => <callback>(),
+	// 		// 'my_virtual_field' => <callback>(),
 	// 	),
 
 	// 	// 'custom_cast_types' => array(
@@ -99,8 +103,8 @@ class CustomPostModel
 	public function __isset($name)
 	{
 		return array_key_exists($name, static::$default_wordpress_post_fields)
-				|| $name === 'url'
-				|| array_key_exists($name, static::$config['fields']);
+				|| array_key_exists($name, static::$config['fields'])
+				|| array_key_exists($name, static::$config['virtual_fields']);
 	}
 
 	public function __get($name)
@@ -109,10 +113,6 @@ class CustomPostModel
 		{
 			$field = static::$default_wordpress_post_fields[$name];
 			return $this->post->$field;
-		}
-		elseif ($name === 'url')
-		{
-			return get_permalink($this->post);
 		}
 		elseif (isset(static::$config['fields'][$name]))
 		{
@@ -141,6 +141,11 @@ class CustomPostModel
 			}
 			else
 				throw new \Exception("Invalid CPM field type for '$name', from object type " . static::$config['post_type']);
+		}
+		elseif (isset(static::$config['virtual_fields'][$name]))
+		{
+			$callback = static::$config['virtual_fields'][$name];
+			return $this->$callback();
 		}
 		else
 			throw new \Exception("Attempt to get unknown property '$name', from object type " . static::$config['post_type']);
@@ -184,6 +189,8 @@ class CustomPostModel
 			else
 				throw new \Exception("Invalid CPM field type for '$name', to object type " . static::$config['post_type']);
 		}
+		elseif (isset(static::$config['virtual_fields'][$name]))
+			throw new \Exception("Attempt to set virtual property '$name', to object type " . static::$config['post_type']);
 		else
 			throw new \Exception("Attempt to set unknown property '$name', to object type " . static::$config['post_type']);
 	}

@@ -6,7 +6,7 @@ class TestPluginPostModel extends Cinnabar\CustomPostModel
 {
 	public static $config = array(
 		'post_type' => 'test_plugin_post',
-		'custom_url_callback' => array('TestPluginPostModel', 'custom_url'),
+
 		'fields' => array(
 			'my_custom_field' => array(
 				'type' => 'meta',
@@ -38,6 +38,12 @@ class TestPluginPostModel extends Cinnabar\CustomPostModel
 				'cast' => 'int',
 			),
 		),
+
+		'virtual_fields' => array(
+			'url' => 'post_url',
+			// 'my_virtual_field' => <callback>(),
+		),
+
 		'field_groups' => array(
 			'actions' => array(
 				// 'fields' => array('my_custom_field'),
@@ -82,9 +88,9 @@ class TestPluginPostModel extends Cinnabar\CustomPostModel
 		),
 	);
 
-	public static function custom_url($post)
+	public function post_url()
 	{
-		return site_url() . '/test_post_view/' . $post->id;
+		return site_url() . '/test_post_view/' . $this->id;
 	}
 
 	public static function render_actions($cpm, $post, $field_group)

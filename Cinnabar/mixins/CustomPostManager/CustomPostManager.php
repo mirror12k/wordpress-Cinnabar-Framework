@@ -111,10 +111,14 @@ class CustomPostManager extends BasePluginMixin
 		if (isset($post))
 		{
 			$class = $this->get_custom_post_class_by_post_type($post->post_type);
-			if (isset($class) && isset($class::$config['custom_url_callback']))
+			if (isset($class))
 			{
-				$callback = $class::$config['custom_url_callback'];
-				return $callback($class::from_post($post));
+				$post = $class::from_post($post);
+				if (isset($post->url))
+				{
+					error_log("got url: $post->url");
+					return $post->url;
+				}
 			}
 		}
 		return $url;
