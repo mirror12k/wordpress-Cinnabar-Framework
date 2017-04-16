@@ -13,6 +13,16 @@ class SyntheticPageManager extends BasePluginMixin
 	public $active_synthetic_page;
 	public $active_view_controller;
 
+	public $twig_loader;
+	public $twig;
+
+	public function __construct($app)
+	{
+		parent::__construct($app);
+		$this->twig_loader = new \Twig_Loader_Filesystem($this->app->plugin_dir());
+		$this->twig = new \Twig_Environment($this->twig_loader);
+	}
+
 	public function load_hooks()
 	{
 		add_filter('post_type_link', array($this, 'rewrite_test_post_url'), 10, 3);
@@ -47,7 +57,7 @@ class SyntheticPageManager extends BasePluginMixin
 	{
 		global $synthetic_manager;
 		$synthetic_manager = $this;
-		
+
 		$this->register_synthetic_page_post_type();
 	}
 
@@ -485,6 +495,12 @@ class SyntheticPageManager extends BasePluginMixin
 		));
 
 		return $query->posts;
+	}
+
+
+	public function render_template($template_path, $template_args)
+	{
+		return $this->twig->render($template_path, $template_args);
 	}
 }
 

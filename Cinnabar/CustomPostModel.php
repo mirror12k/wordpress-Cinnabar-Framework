@@ -297,7 +297,7 @@ class CustomPostModel
 			'posts_per_page' => 1,
 		));
 
-		$query = new WP_Query($args);
+		$query = new \WP_Query($args);
 		if ($query->have_posts())
 			return static::from_post($query->post);
 		else
@@ -369,7 +369,8 @@ class CustomPostModel
 		if (!isset($args['posts_per_page']))
 			$args['posts_per_page'] = -1;
 
-		$query = new WP_Query($args);
+		// error_log("got list_posts request: " . json_encode($args));
+		$query = new \WP_Query($args);
 		$posts = array();
 		foreach ($query->posts as $post)
 			$posts[] = static::from_post($post);

@@ -312,6 +312,50 @@ class CustomUserModel
 		return $user;
 	}
 
+
+	public static function list_users($args=array())
+	{
+		if (!isset($args['meta_query']))
+		{
+			$args['meta_query'] = array(
+				array(
+					'key' => 'custom_user_model__user_type',
+					'value' => static::$config['user_type'],
+				),
+			);
+		}
+		else
+		{
+			$args['meta_query'][] = array(
+				'key' => 'custom_user_model__user_type',
+				'value' => static::$config['user_type'],
+			);
+		}
+
+		if (!isset($args['number']))
+			$args['number'] = -1;
+
+		// error_log("got list_users request: " . json_encode($args));
+		$query = new \WP_User_Query($args);
+		$users = array();
+		foreach ($query->get_results() as $userdata)
+		{
+			error_log("got user: " . $userdata->ID);
+			$users[] = static::from_userdata($userdata);
+		}
+
+		return $users;
+	}
+
+	public static function search_users($name, $count=-1, $args=array())
+	{
+		$args['search'] = "*$name*";
+		$args['number'] = $count;
+		$args['search_columns'] = array('nickname');
+		
+		return static::list_users($args);
+	}
+
 }
 
 
