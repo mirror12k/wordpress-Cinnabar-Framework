@@ -181,25 +181,25 @@ class CustomPostManager extends BasePluginMixin
 					{
 						$value_array = $value;
 
-						echo "<div data-field-name='" . htmlspecialchars($name) . "' class='cpm-input-array'>";
-						echo "<div class='cpm-input-array-template' style='display: none;'>";
-						echo "<div class='cpm-input-array-field'>";
+						echo "<div data-field-name='" . htmlspecialchars($name) . "' class='input-array'>";
+						echo "<div class='input-array-template' style='display: none;'>";
+						echo "<div class='input-array-field'>";
 						$this->render_meta_input($class, $field, '', '', true);
-						echo "<button type='button' class='cpm-input-array-remove-button'>X</button>";
+						echo "<button type='button' class='input-array-remove-button'>X</button>";
 						echo "</div>";
 						echo "</div>";
-						echo "<div class='cpm-input-array-container'>";
+						echo "<div class='input-array-container'>";
 						if (count($value_array) > 0)
 							foreach (range(0, count($value_array) - 1) as $i)
 							{
-								echo "<div class='cpm-input-array-field'>";
+								echo "<div class='input-array-field'>";
 								$this->render_meta_input($class, $field, $name . '[' . $i . ']', $value_array[$i]);
-								echo "<button type='button' class='cpm-input-array-remove-button'>X</button>";
+								echo "<button type='button' class='input-array-remove-button'>X</button>";
 								echo "</div>";
 							}
 
 						echo "</div>";
-						echo "<button type='button' class='cpm-input-array-add-button'>+</button>";
+						echo "<button type='button' class='input-array-add-button'>+</button>";
 						echo "</div>";
 					}
 				?>

@@ -340,7 +340,7 @@ class CustomUserModel
 		$users = array();
 		foreach ($query->get_results() as $userdata)
 		{
-			error_log("got user: " . $userdata->ID);
+			// error_log("got user: " . $userdata->ID);
 			$users[] = static::from_userdata($userdata);
 		}
 
