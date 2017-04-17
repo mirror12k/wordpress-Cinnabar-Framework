@@ -110,11 +110,18 @@ class CustomPostManager extends BasePluginMixin
 					}
 					elseif ($field['type'] === 'meta-array')
 					{
-						$value_array = $value;
-						$new_array = array();
-						foreach ($value_array as $value)
-							$new_array[] = $class::cast_value_from_string($field['cast'], $value, $field);
-						$value = $new_array;
+						if (isset($value))
+						{
+							$value_array = $value;
+							$new_array = array();
+							foreach ($value_array as $value)
+								$new_array[] = $class::cast_value_from_string($field['cast'], $value, $field);
+							$value = $new_array;
+						}
+						else
+						{
+							$value = array();
+						}
 					}
 				}
 
