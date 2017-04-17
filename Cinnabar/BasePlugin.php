@@ -21,6 +21,9 @@ class BasePlugin
 	public $global_scripts = array();
 	public $global_style_sheets = array();
 
+	public $admin_scripts = array();
+	public $admin_style_sheets = array();
+
 
 	// entry point, must be called at the start of the plugin to load the application functionality
 	public function load_plugin()
@@ -54,6 +57,18 @@ class BasePlugin
 	{
 		foreach ($style_sheets as $name => $style_sheet)
 			$this->global_style_sheets[$name] = $style_sheet;
+	}
+
+	public function register_admin_scripts($scripts)
+	{
+		foreach ($scripts as $name => $script)
+			$this->admin_scripts[$name] = $script;
+	}
+
+	public function register_admin_style_sheets($style_sheets)
+	{
+		foreach ($style_sheets as $name => $style_sheet)
+			$this->admin_style_sheets[$name] = $style_sheet;
 	}
 
 
@@ -98,6 +113,7 @@ class BasePlugin
 
 		// enqueue global scripts and styles
 		add_action('wp_enqueue_scripts', array($this, 'wordpress_enqueue_scripts'));
+		add_action('admin_enqueue_scripts', array($this, 'wordpress_admin_enqueue_scripts'));
 	}
 
 	public function wordpress_enqueue_scripts()
@@ -110,6 +126,21 @@ class BasePlugin
 				wp_enqueue_script($name);
 		}
 		foreach ($this->global_style_sheets as $name => $style_sheet)
+		{
+			wp_enqueue_script($name, $this->plugin_url('/' . $style_sheet));
+		}
+	}
+
+	public function wordpress_admin_enqueue_scripts()
+	{
+		foreach ($this->admin_scripts as $name => $script)
+		{
+			if ($script !== null)
+				wp_enqueue_script($name, $this->plugin_url('/' . $script));
+			else
+				wp_enqueue_script($name);
+		}
+		foreach ($this->admin_style_sheets as $name => $style_sheet)
 		{
 			wp_enqueue_script($name, $this->plugin_url('/' . $style_sheet));
 		}
