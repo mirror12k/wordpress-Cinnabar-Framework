@@ -300,7 +300,8 @@ class CustomUserModel
 			die("error creating " . static::$config['user_type'] . " user: " . $result->get_error_message());
 
 		$userid = $result;
-		$user = static::get_by_id($userid);
+		$userdata = get_user_by('id', (int)$userid);
+		$user = static::from_userdata($userdata);
 
 		// mark him as a user of this custom model type
 		update_user_meta((int)$userid, 'custom_user_model__user_type', static::$config['user_type']);
@@ -356,6 +357,31 @@ class CustomUserModel
 		return static::list_users($args);
 	}
 
+	public static function get_by($field, $value, $args=array())
+	{
+		if (!isset($args['meta_query']))
+		{
+			$args['meta_query'] = array(
+				array(
+					'key' => static::$config['user_type'] . '__' . $field,
+					'value' => $value,
+				),
+			);
+		}
+		else
+		{
+			$args['meta_query'][] = array(
+				'key' => static::$config['user_type'] . '__' . $field,
+				'value' => $value,
+			);
+		}
+		
+		$users = static::list_users($args);
+		if (count($users) > 0)
+			return $users[0];
+		else
+			return null;
+	}
 }
 
 
