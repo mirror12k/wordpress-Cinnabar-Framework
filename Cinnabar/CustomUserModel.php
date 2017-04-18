@@ -20,6 +20,11 @@ class CustomUserModel
 	// 		),
 	// 	),
 
+	// 	'virtual_fields' => array(
+	// 		// 'url' => <callback>(),
+	// 		// 'my_virtual_field' => <callback>(),
+	// 	),
+
 	// 	// 'custom_cast_types' => array(
 	// 	// 	'my_cast' => array(
 	// 	// 		'from_string' => <callback>($value, $field),
@@ -72,7 +77,8 @@ class CustomUserModel
 	public function __isset($name)
 	{
 		return array_key_exists($name, static::$default_wordpress_user_fields)
-				|| array_key_exists($name, static::$config['fields']);
+				|| array_key_exists($name, static::$config['fields'])
+				|| array_key_exists($name, static::$config['virtual_fields']);
 	}
 
 	public function __get($name)
@@ -81,7 +87,7 @@ class CustomUserModel
 		{
 			$field = static::$default_wordpress_user_fields[$name];
 			if ($name === 'slug') {
-				$value = $this->post->$field;
+				$value = $this->userdata->$field;
 				if (substr($value, 0, strlen(static::$config['slug_prefix'])) === static::$config['slug_prefix'])
 					return substr($value, strlen(static::$config['slug_prefix']));
 				else
@@ -120,6 +126,11 @@ class CustomUserModel
 			else
 				throw new \Exception("Invalid CPM field type for '$name', from user type " . static::$config['user_type']);
 		}
+		elseif (isset(static::$config['virtual_fields'][$name]))
+		{
+			$callback = static::$config['virtual_fields'][$name];
+			return $this->$callback();
+		}
 		else
 			throw new \Exception("Attempt to get unknown property '$name', from user type " . static::$config['user_type']);
 	}
@@ -130,7 +141,7 @@ class CustomUserModel
 		{
 			$field = static::$default_wordpress_user_fields[$name];
 			// $this->userdata->$field = $value;
-			
+
 			if ($name === 'slug')
 				$value = static::$config['slug_prefix'] . (string)$value;
 
@@ -170,6 +181,8 @@ class CustomUserModel
 			else
 				throw new \Exception("Invalid CPM field type for '$name', to user type " . static::$config['user_type']);
 		}
+		elseif (isset(static::$config['virtual_fields'][$name]))
+			throw new \Exception("Attempt to set virtual property '$name', to object type " . static::$config['post_type']);
 		else
 			throw new \Exception("Attempt to set unknown property '$name', to user type " . static::$config['user_type']);
 	}
@@ -262,9 +275,10 @@ class CustomUserModel
 	public static function get_by_slug($slug)
 	{
 		$userdata = get_user_by('slug', static::$config['slug_prefix'] . (string)$slug);
+
 		if ($userdata === false)
 			return null;
-		if (!static::is_user_of_type($userid))
+		if (!static::is_user_of_type($userdata->ID))
 			return null;
 		
 		return static::from_userdata($userdata);

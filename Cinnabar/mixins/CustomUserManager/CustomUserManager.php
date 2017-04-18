@@ -64,6 +64,7 @@ class CustomUserManager extends BasePluginMixin
 			{
 				$this->render_meta_fields($user, $class);
 			}
+			$this->render_slug_field($user, $class);
 		}
 	}
 
@@ -85,13 +86,31 @@ class CustomUserManager extends BasePluginMixin
 			$user = $class::get_by_id($user_id);
 			if ($user === null)
 				die("user is null");
+			
+			$user->slug = $_POST['slug'];
+
 			foreach ($class::$config['fields'] as $name => $field)
 			{
-				error_log("got value for $name: " . json_encode($_POST[$name]));
+				// error_log("got value for $name: " . json_encode($_POST[$name]));
 				$user->$name = $_POST[$name];
 			}
 		}
 
+	}
+
+	public function render_slug_field($user, $class)
+	{
+		?>
+		<h2>User Slug</h2>
+		<table class="form-table">
+			<tr>
+				<th><label for="slug">Slug</label></th>
+				<td>
+					<input type="text" name='slug' value="<?php echo htmlspecialchars($user->slug); ?>" />
+				</td>
+			</tr>
+		</table>
+		<?php
 	}
 
 	public function render_meta_fields($user, $class, $field_group=null)
