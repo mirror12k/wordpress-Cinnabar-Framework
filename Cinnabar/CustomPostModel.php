@@ -156,7 +156,10 @@ class CustomPostModel
 		if (isset(static::$default_wordpress_post_fields[$name]))
 		{
 			$field = static::$default_wordpress_post_fields[$name];
-			$this->post->$field = $value;
+			wp_update_post(array(
+				'ID' => (int)$this->post->ID,
+				$field => (string)$value,
+			));
 		}
 		elseif (isset(static::$config['fields'][$name]))
 		{
@@ -288,7 +291,7 @@ class CustomPostModel
 		return static::from_post($post);
 	}
 
-	public static function get_by_slug($team_type, $slug, $args=array())
+	public static function get_by_slug($slug, $args=array())
 	{
 		$args = array_merge($args, array(
 			// 'post_status' => array('publish', 'pending'),

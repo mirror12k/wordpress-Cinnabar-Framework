@@ -119,7 +119,12 @@ class CustomUserModel
 		if (isset(static::$default_wordpress_user_fields[$name]))
 		{
 			$field = static::$default_wordpress_user_fields[$name];
-			$this->userdata->$field = $value;
+			// $this->userdata->$field = $value;
+
+			wp_update_user(array(
+				'ID' => (int)$this->userdata->ID,
+				$field => (string)$value,
+			));
 		}
 		elseif (isset(static::$config['fields'][$name]))
 		{

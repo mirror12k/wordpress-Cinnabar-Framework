@@ -8,6 +8,8 @@ class CustomPostManager extends BasePluginMixin
 {
 	public $registered_custom_posts = array();
 
+	public $is_saving_post = false;
+
 
 
 	public function register_custom_post_type($class)
@@ -36,6 +38,18 @@ class CustomPostManager extends BasePluginMixin
 		$class = $this->get_custom_post_class_by_post_type($post_type);
 		if (isset($class))
 		{
+			add_meta_box(
+				$class::$config['post_type'] . '-slug',
+				__( 'Post Slug', $class::$config['post_type']),
+				function ($post) use ($self, $class) {
+					$post = $class::from_post($post);
+					$self->render_slug_field($post, $class);
+				},
+				$class::$config['post_type'],
+				'normal',
+				'default'
+			);
+
 			if (isset($class::$config['field_groups']))
 			{
 				foreach ($class::$config['field_groups'] as $tag => $field_group)
@@ -82,6 +96,10 @@ class CustomPostManager extends BasePluginMixin
 
 	public function wordpress_save_post($post_id, $post)
 	{
+		// prevent save_post-wp_update_post loops
+		if ($this->is_saving_post)
+			return;
+
 		// Check if the user has permissions to save data.
 		if (!current_user_can('edit_post', $post_id))
 			return;
@@ -94,10 +112,15 @@ class CustomPostManager extends BasePluginMixin
 		if (wp_is_post_revision($post_id))
 			return;
 
+		$this->is_saving_post = true;
+
 		$class = $this->get_custom_post_class_by_post_type($post->post_type);
 		if (isset($class))
 		{
 			$post = $class::from_post($post);
+			
+			$post->slug = $_POST['slug'];
+
 			foreach ($class::$config['fields'] as $name => $field)
 			{
 				// error_log("got value for $name: " . json_encode($_POST[$name]));
@@ -129,6 +152,8 @@ class CustomPostManager extends BasePluginMixin
 				$post->$name = $value;
 			}
 		}
+
+		$this->is_saving_post = false;
 	}
 
 	public function wordpress_post_type_link($url, $post)
@@ -147,6 +172,20 @@ class CustomPostManager extends BasePluginMixin
 			}
 		}
 		return $url;
+	}
+
+	public function render_slug_field($post, $class)
+	{
+		?>
+		<table class="form-table">
+			<tr>
+				<th><label for="slug" class="<?php echo htmlspecialchars($name); ?>_label">Slug</label></th>
+				<td>
+					<input type="text" name='slug' value="<?php echo htmlspecialchars($post->slug); ?>" />
+				</td>
+			</tr>
+		</table>
+		<?php
 	}
 
 	public function render_meta_boxes($post, $class, $field_group=null)
