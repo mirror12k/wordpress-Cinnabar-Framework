@@ -112,7 +112,17 @@ class CustomPostModel
 		if (isset(static::$default_wordpress_post_fields[$name]))
 		{
 			$field = static::$default_wordpress_post_fields[$name];
-			return $this->post->$field;
+			if ($name === 'slug') {
+				$value = $this->post->$field;
+				if (substr($value, 0, strlen(static::$config['slug_prefix'])) === static::$config['slug_prefix'])
+					return substr($value, strlen(static::$config['slug_prefix']));
+				else
+					return '';
+			}
+			else
+			{
+				return $this->post->$field;
+			}
 		}
 		elseif (isset(static::$config['fields'][$name]))
 		{
@@ -156,6 +166,10 @@ class CustomPostModel
 		if (isset(static::$default_wordpress_post_fields[$name]))
 		{
 			$field = static::$default_wordpress_post_fields[$name];
+
+			if ($name === 'slug')
+				$value = static::$config['slug_prefix'] . (string)$value;
+
 			wp_update_post(array(
 				'ID' => (int)$this->post->ID,
 				$field => (string)$value,

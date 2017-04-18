@@ -80,7 +80,17 @@ class CustomUserModel
 		if (isset(static::$default_wordpress_user_fields[$name]))
 		{
 			$field = static::$default_wordpress_user_fields[$name];
-			return $this->userdata->$field;
+			if ($name === 'slug') {
+				$value = $this->post->$field;
+				if (substr($value, 0, strlen(static::$config['slug_prefix'])) === static::$config['slug_prefix'])
+					return substr($value, strlen(static::$config['slug_prefix']));
+				else
+					return '';
+			}
+			else
+			{
+				return $this->userdata->$field;
+			}
 		}
 		elseif (isset(static::$config['fields'][$name]))
 		{
@@ -120,6 +130,9 @@ class CustomUserModel
 		{
 			$field = static::$default_wordpress_user_fields[$name];
 			// $this->userdata->$field = $value;
+			
+			if ($name === 'slug')
+				$value = static::$config['slug_prefix'] . (string)$value;
 
 			wp_update_user(array(
 				'ID' => (int)$this->userdata->ID,
