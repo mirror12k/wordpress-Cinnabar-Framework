@@ -182,6 +182,7 @@ class CustomPostModel
 				if (isset(static::$config['fields'][$name]['cast']))
 					$value = static::cast_value_to_string(static::$config['fields'][$name]['cast'], $value, static::$config['fields'][$name]);
 
+				// error_log("debug update_post_meta for " . $this->post->ID . ' field ' . static::$config['post_type'] . '__' . $name);
 				update_post_meta($this->post->ID, static::$config['post_type'] . '__' . $name, $value);
 			}
 			elseif (static::$config['fields'][$name]['type'] === 'meta-array')
@@ -412,6 +413,26 @@ class CustomPostModel
 			static::$config['registration_properties']['description'] = __(static::$config['registration_properties']['description'], static::$config['post_type']);
 			register_post_type(static::$config['post_type'], static::$config['registration_properties']);
 		}
+
+		add_action('transition_post_status', array(get_called_class(), 'on_all_status_transitions'), 10, 3);
+	}
+
+	public static function on_all_status_transitions($new_status, $old_status, $post) {
+		// error_log("on_all_status_transitions: $old_status => $new_status : " . json_encode($post));
+		if ($post->post_type === static::$config['post_type'] && $old_status === 'new')
+			static::on_new_post($post);
+	}
+
+	public static function on_new_post($post)
+	{
+		// error_log("on_new_post for post type " . static::$config['post_type']);
+		$post = static::from_post($post);
+
+		foreach (static::$config['fields'] as $name => $field)
+			if (isset($field['default']))
+			{
+				$post->$name = $field['default'];
+			}
 	}
 }
 

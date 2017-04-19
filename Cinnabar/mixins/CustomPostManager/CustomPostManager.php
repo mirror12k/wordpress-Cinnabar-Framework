@@ -123,33 +123,35 @@ class CustomPostManager extends BasePluginMixin
 
 			foreach ($class::$config['fields'] as $name => $field)
 			{
-				// error_log("got value for $name: " . json_encode($_POST[$name]));
-				$value = $_POST[$name];
-				if (isset($field['cast']))
+				if (isset($_POST[$name]))
 				{
-					if ($field['type'] === 'meta')
+					// error_log("got value for $name: " . json_encode($_POST[$name]));
+					$value = $_POST[$name];
+					if (isset($field['cast']))
 					{
-						$value = $class::cast_value_from_string($field['cast'], $value, $field, $class);
-					}
-					elseif ($field['type'] === 'meta-array')
-					{
-						if (isset($value))
+						if ($field['type'] === 'meta')
 						{
-							$value_array = $value;
-							$new_array = array();
-							foreach ($value_array as $value)
-								$new_array[] = $class::cast_value_from_string($field['cast'], $value, $field);
-							$value = $new_array;
+							$value = $class::cast_value_from_string($field['cast'], $value, $field, $class);
 						}
-						else
+						elseif ($field['type'] === 'meta-array')
 						{
-							$value = array();
+							if (isset($value))
+							{
+								$value_array = $value;
+								$new_array = array();
+								foreach ($value_array as $value)
+									$new_array[] = $class::cast_value_from_string($field['cast'], $value, $field);
+								$value = $new_array;
+							}
+							else
+							{
+								$value = array();
+							}
 						}
 					}
+					
+					$post->$name = $value;
 				}
-
-
-				$post->$name = $value;
 			}
 		}
 
@@ -190,6 +192,7 @@ class CustomPostManager extends BasePluginMixin
 
 	public function render_meta_boxes($post, $class, $field_group=null)
 	{
+		// error_log("debug render_meta_boxes: " . json_encode($post));
 		echo '<table class="form-table">';
 
 		if ($field_group === null)
