@@ -137,7 +137,11 @@ class CustomPostManager extends BasePluginMixin
 						{
 							if (isset($value))
 							{
-								$value_array = $value;
+								if ($value === '')
+									$value_array = array();
+								else
+									$value_array = $value;
+								
 								$new_array = array();
 								foreach ($value_array as $value)
 									$new_array[] = $class::cast_value_from_string($field['cast'], $value, $field);
@@ -149,7 +153,7 @@ class CustomPostManager extends BasePluginMixin
 							}
 						}
 					}
-					
+
 					$post->$name = $value;
 				}
 			}

@@ -21,8 +21,8 @@ class InputHelperLibrary extends BasePluginMixin
 				'callback' => array($this, 'input_helper_library__dynamic_input_query'),
 				'validate' => array(
 					// 'current_user' => array('is_logged_in_validator'),
-					'dynamic_input_name' => array('cast_string'),
-					'query' => array('cast_string'),
+					'dynamic_input_name' => array('cast_string' => array()),
+					'query' => array('cast_string' => array()),
 				),
 			),
 		));

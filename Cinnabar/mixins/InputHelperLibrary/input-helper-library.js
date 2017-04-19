@@ -4,10 +4,16 @@ jQuery(function ($) {
 
 	function reindex_input_fields(input_array) {
 		var field_name = $(input_array).data('field-name');
+		
 		$(input_array).find('.input-array-container .input-array-field').each(function (index) {
 			var field = this;
 			$(field).find('.field-name-holder').attr('name', field_name + '[' + index + ']');
-		})
+		});
+		if ($(input_array).find('.input-array-container .input-array-field').length === 0) {
+			$(input_array).append("<input class='input-array-empty-value' type='hidden' name='" + field_name + "' value='' />");
+		} else {
+			$(input_array).find('.input-array-empty-value').remove();
+		}
 	}
 
 	function add_input_field(input_array, e) {
@@ -33,6 +39,7 @@ jQuery(function ($) {
 			$(field).find('.input-array-remove-button').click(remove_input_field.bind(undefined, input_array, field));
 		});
 
+		reindex_input_fields(input_array);
 	});
 
 	function hook_dynamic_input_containers(dom) {

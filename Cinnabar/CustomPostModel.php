@@ -146,7 +146,7 @@ class CustomPostModel
 						$cast_array[] = static::cast_value_from_string(static::$config['fields'][$name]['cast'], $value, static::$config['fields'][$name]);
 					$value_array = $cast_array;
 				}
-
+				// error_log("debug __get: " . json_encode($value_array));
 				return $value_array;
 			}
 			else

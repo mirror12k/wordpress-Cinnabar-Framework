@@ -21,6 +21,7 @@ class AjaxGatewayManager extends BasePluginMixin
 	{
 		$this->register_ajax_validators(array(
 			'is_logged_in_validator' => array('Cinnabar\\AjaxGatewayManager', 'is_logged_in_validator'),
+			'not_null_validator' => array('Cinnabar\\AjaxGatewayManager', 'not_null_validator'),
 			'cast_bool' => array('Cinnabar\\AjaxGatewayManager', 'cast_bool'),
 			'cast_int' => array('Cinnabar\\AjaxGatewayManager', 'cast_int'),
 			'cast_string' => array('Cinnabar\\AjaxGatewayManager', 'cast_string'),
@@ -113,9 +114,9 @@ class AjaxGatewayManager extends BasePluginMixin
 			{
 				if (!isset($data[$argument]))
 					throw new \Exception("Missing argument: $argument");
-				foreach ($validators as $validator)
+				foreach ($validators as $validator => $args)
 				{
-					$data[$argument] = $this->registered_ajax_validators[$validator]($data, $data[$argument]);
+					$data[$argument] = $this->registered_ajax_validators[$validator]($data, $data[$argument], $args);
 				}
 			}
 		}
@@ -133,31 +134,38 @@ class AjaxGatewayManager extends BasePluginMixin
 
 
 	// default builtin validators
-	public static function is_logged_in_validator($data, $arg)
+	public static function is_logged_in_validator($data, $value, $args)
 	{
 		if ($data['current_user'] === 0)
 			throw new \Exception("Please log in");
-		return $arg;
+		return $value;
 	}
 
-	public static function cast_bool($data, $arg)
+	public static function not_null_validator($data, $value, $args)
 	{
-		return (bool)$arg;
+		if ($value === null)
+			throw new \Exception("invalid argument");
+		return $value;
 	}
 
-	public static function cast_int($data, $arg)
+	public static function cast_bool($data, $value, $args)
 	{
-		return (int)$arg;
+		return (bool)$value;
 	}
 
-	public static function cast_string($data, $arg)
+	public static function cast_int($data, $value, $args)
 	{
-		return (string)$arg;
+		return (int)$value;
 	}
 
-	public static function parse_json($data, $arg)
+	public static function cast_string($data, $value, $args)
 	{
-		return json_decode($arg);
+		return (string)$value;
+	}
+
+	public static function parse_json($data, $value, $args)
+	{
+		return json_decode($value);
 	}
 }
 

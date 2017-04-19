@@ -92,7 +92,15 @@ class CustomUserManager extends BasePluginMixin
 			foreach ($class::$config['fields'] as $name => $field)
 			{
 				// error_log("got value for $name: " . json_encode($_POST[$name]));
-				$user->$name = $_POST[$name];
+				if (isset($_POST[$name]))
+				{
+					$value = $_POST[$name];
+
+					if ($value === '' && $field['type'] === 'meta-array')
+						$value = array();
+					
+					$user->$name = $value;
+				}
 			}
 		}
 
