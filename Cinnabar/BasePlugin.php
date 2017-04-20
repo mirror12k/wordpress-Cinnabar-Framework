@@ -323,9 +323,10 @@ class BasePlugin
 
 	public function do_plugin_action($action, $args)
 	{
+		// error_log("plugin_action: " . $this->plugin_name . "__action__" . $action);
 		$prefix = $this->plugin_name . "__action__";
 		$actions = array_merge(array("$prefix$action"), $args);
-		// echo ("calling do_action with " . json_encode($actions));
+		// error_log("calling do_action with " . json_encode($actions));
 		call_user_func_array('do_action', $actions);
 	}
 

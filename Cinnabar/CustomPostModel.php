@@ -6,6 +6,8 @@ namespace Cinnabar;
 
 class CustomPostModel
 {
+	// public static $manager;
+
 	// public static $config = array(
 	// 	'post_type' => 'my_custom_post',
 	// 	'slug_prefix' => '',
@@ -112,7 +114,8 @@ class CustomPostModel
 		if (isset(static::$default_wordpress_post_fields[$name]))
 		{
 			$field = static::$default_wordpress_post_fields[$name];
-			if ($name === 'slug') {
+			if ($name === 'slug')
+			{
 				$value = $this->post->$field;
 				if (substr($value, 0, strlen(static::$config['slug_prefix'])) === static::$config['slug_prefix'])
 					return substr($value, strlen(static::$config['slug_prefix']));
@@ -211,6 +214,8 @@ class CustomPostModel
 			throw new \Exception("Attempt to set virtual property '$name', to object type " . static::$config['post_type']);
 		else
 			throw new \Exception("Attempt to set unknown property '$name', to object type " . static::$config['post_type']);
+
+		static::$manager->do_cpm_action(get_called_class(), 'changed__' . $name, array($this));
 	}
 
 	public function add($name, $value)
@@ -223,6 +228,9 @@ class CustomPostModel
 		}
 		else
 			throw new \Exception("Attempt to add invalid property value '$name', to object type " . static::$config['post_type']);
+
+		static::$manager->do_cpm_action(get_called_class(), 'changed__' . $name, array($this));
+		static::$manager->do_cpm_action(get_called_class(), 'added__' . $name, array($this, $value));
 	}
 
 	public function remove($name, $value)
@@ -235,6 +243,9 @@ class CustomPostModel
 		}
 		else
 			throw new \Exception("Attempt to remove invalid property value '$name', to object type " . static::$config['post_type']);
+
+		static::$manager->do_cpm_action(get_called_class(), 'changed__' . $name, array($this));
+		static::$manager->do_cpm_action(get_called_class(), 'removed__' . $name, array($this, $value));
 	}
 
 	public static function cast_value_from_string($cast_type, $value, $field, $class='')
@@ -378,6 +389,8 @@ class CustomPostModel
 
 		// wp_set_object_terms($matchid, $terms, 'tfcl_match_type');
 
+		static::$manager->do_cpm_action(get_called_class(), 'created', array($post));
+
 		return $post;
 	}
 
@@ -404,8 +417,10 @@ class CustomPostModel
 		return static::list_posts($args);
 	}
 
-	public static function register()
+	public static function register($manager)
 	{
+		static::$manager = $manager;
+
 		if (isset(static::$config['registration_properties']))
 		{
 			foreach (static::$config['registration_properties']['labels'] as $key => $text)
@@ -433,6 +448,8 @@ class CustomPostModel
 			{
 				$post->$name = $field['default'];
 			}
+
+		static::$manager->do_cpm_action(get_called_class(), 'new', array($post));
 	}
 }
 

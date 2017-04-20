@@ -15,7 +15,7 @@ class CustomPostManager extends BasePluginMixin
 	public function register_custom_post_type($class)
 	{
 		$this->registered_custom_posts[] = $class;
-		$class::register();
+		$class::register($this);
 	}
 
 	public function load_hooks()
@@ -141,7 +141,7 @@ class CustomPostManager extends BasePluginMixin
 									$value_array = array();
 								else
 									$value_array = $value;
-								
+
 								$new_array = array();
 								foreach ($value_array as $value)
 									$new_array[] = $class::cast_value_from_string($field['cast'], $value, $field);
@@ -307,6 +307,16 @@ class CustomPostManager extends BasePluginMixin
 		foreach ($this->registered_custom_posts as $class)
 			if ($class::$config['post_type'] === $post_type)
 				return $class;
+	}
+
+	public function do_cpm_action($class, $action, $args)
+	{
+		$this->app->do_plugin_action($class::$config['post_type'] . '__' . $action, $args);
+	}
+
+	public function on_cpm_action($class, $action, $callback, $arg_count=1, $priority=10)
+	{
+		$this->app->on_plugin_action($class::$config['post_type'] . '__' . $action, $callback, $arg_count, $priority);
 	}
 }
 
