@@ -2,10 +2,6 @@
     "name": "mirror12k/wordpress-cinnabar-framework",
     "version": "1.0.0",
     "type": "library",
-    "dist": {
-        "url": "https://github.com/mirror12k/wordpress-Cinnabar-Framework/archive/master.zip",
-        "type": "zip"
-    },
     "autoload": {
         "psr-4": {
             "Cinnabar\\": "src/Cinnabar/"
