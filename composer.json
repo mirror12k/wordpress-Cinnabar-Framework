@@ -1,8 +1,8 @@
 {
-    "name": "mirror12k/Cinnabar",
+    "name": "mirror12k/cinnabar",
     "version": "1.0.0",
     "dist": {
-        "url": "http://www.github.com/mirror12k/Wordpress-Cinnabar-Framework",
+        "url": "https://github.com/mirror12k/wordpress-Cinnabar-Framework/archive/master.zip",
         "type": "zip"
     },
     "autoload": {
