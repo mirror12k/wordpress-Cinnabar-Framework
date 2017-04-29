@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Cinnabar\Mixin;
+namespace Cinnabar\Mixin\SyntheticPageManager;
 
 class ViewController
 {
