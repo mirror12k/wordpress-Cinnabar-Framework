@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Cinnabar;
+namespace Cinnabar\Mixin;
 
 class ViewController
 {

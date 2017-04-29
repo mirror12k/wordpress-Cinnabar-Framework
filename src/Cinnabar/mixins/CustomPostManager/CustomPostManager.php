@@ -2,9 +2,9 @@
 
 
 
-namespace Cinnabar;
+namespace Cinnabar\Mixin;
 
-class CustomPostManager extends BasePluginMixin
+class CustomPostManager extends \Cinnabar\BasePluginMixin
 {
 	public $registered_custom_posts = array();
 

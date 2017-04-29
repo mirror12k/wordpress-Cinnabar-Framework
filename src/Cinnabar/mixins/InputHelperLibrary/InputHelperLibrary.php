@@ -2,9 +2,9 @@
 
 
 
-namespace Cinnabar;
+namespace Cinnabar\Mixin;
 
-class InputHelperLibrary extends BasePluginMixin
+class InputHelperLibrary extends \Cinnabar\BasePluginMixin
 {
 
 	public $registered_dynamic_input_callbacks = array();

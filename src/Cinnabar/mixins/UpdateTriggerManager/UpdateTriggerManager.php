@@ -2,9 +2,9 @@
 
 
 
-namespace Cinnabar;
+namespace Cinnabar\Mixin;
 
-class UpdateTriggerManager extends BasePluginMixin
+class UpdateTriggerManager extends \Cinnabar\BasePluginMixin
 {
 
 	// // chronological version history used to execute update hooks in sequence

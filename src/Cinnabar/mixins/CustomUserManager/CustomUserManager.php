@@ -2,9 +2,9 @@
 
 
 
-namespace Cinnabar;
+namespace Cinnabar\Mixin;
 
-class CustomUserManager extends BasePluginMixin
+class CustomUserManager extends \Cinnabar\BasePluginMixin
 {
 	public $registered_custom_users = array();
 

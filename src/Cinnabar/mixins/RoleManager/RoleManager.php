@@ -2,9 +2,9 @@
 
 
 
-namespace Cinnabar;
+namespace Cinnabar\Mixin;
 
-class RoleManager extends BasePluginMixin
+class RoleManager extends \Cinnabar\BasePluginMixin
 {
 	public $registered_role_capabilities = array();
 

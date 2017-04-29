@@ -2,9 +2,9 @@
 
 
 
-namespace Cinnabar;
+namespace Cinnabar\Mixin;
 
-class EmailManager extends BasePluginMixin
+class EmailManager extends \Cinnabar\BasePluginMixin
 {
 
 	public function register()

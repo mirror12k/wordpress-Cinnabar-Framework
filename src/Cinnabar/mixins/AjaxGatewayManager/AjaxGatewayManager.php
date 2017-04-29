@@ -2,9 +2,9 @@
 
 
 
-namespace Cinnabar;
+namespace Cinnabar\Mixin;
 
-class AjaxGatewayManager extends BasePluginMixin
+class AjaxGatewayManager extends \Cinnabar\BasePluginMixin
 {
 	public $registered_ajax_actions = array();
 	public $registered_ajax_validators = array();

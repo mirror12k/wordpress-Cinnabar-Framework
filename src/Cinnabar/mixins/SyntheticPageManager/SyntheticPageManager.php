@@ -2,11 +2,11 @@
 
 
 
-namespace Cinnabar;
+namespace Cinnabar\Mixin;
 
 require_once 'ViewController.php';
 
-class SyntheticPageManager extends BasePluginMixin
+class SyntheticPageManager extends \Cinnabar\BasePluginMixin
 {
 	public $registered_synthetic_pages = array();
 
