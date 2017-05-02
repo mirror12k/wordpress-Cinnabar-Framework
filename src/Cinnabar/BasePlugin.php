@@ -119,13 +119,13 @@ class BasePlugin
 		foreach ($this->global_scripts as $name => $script)
 		{
 			if ($script !== null)
-				wp_enqueue_script($name, $this->plugin_url('/' . $script));
+				wp_enqueue_script($name, $script);
 			else
 				wp_enqueue_script($name);
 		}
 		foreach ($this->global_style_sheets as $name => $style_sheet)
 		{
-			wp_enqueue_script($name, $this->plugin_url('/' . $style_sheet));
+			wp_enqueue_script($name, $style_sheet);
 		}
 	}
 
@@ -134,13 +134,13 @@ class BasePlugin
 		foreach ($this->admin_scripts as $name => $script)
 		{
 			if ($script !== null)
-				wp_enqueue_script($name, $this->plugin_url('/' . $script));
+				wp_enqueue_script($name, $script);
 			else
 				wp_enqueue_script($name);
 		}
 		foreach ($this->admin_style_sheets as $name => $style_sheet)
 		{
-			wp_enqueue_script($name, $this->plugin_url('/' . $style_sheet));
+			wp_enqueue_script($name, $style_sheet);
 		}
 	}
 

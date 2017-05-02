@@ -108,7 +108,7 @@ class SyntheticPageManager extends \Cinnabar\BasePluginMixin
 		if (isset($this->active_synthetic_page) && isset($this->active_synthetic_page['scripts']))
 		{
 			foreach ($this->active_synthetic_page['scripts'] as $script_name => $script)
-				wp_enqueue_script('synthetic-page-js-include-' . $script_name, $this->plugin_url($script));
+				wp_enqueue_script('synthetic-page-js-include-' . $script_name, $script);
 			if (isset($this->active_view_controller))
 			{
 				foreach ($this->active_view_controller->js_args() as $script_name => $args)
