@@ -13,12 +13,12 @@ class CustomPostModel
 	// 	'slug_prefix' => '',
 
 	// 	'fields' => array(
-	// 		'my_custom_field' => array(
-	// 			'type' => 'meta',
-	// 			// 'cast' => 'int',
-	// 			// 'default' => '15',
-	// 			// 'description' => 'my custom field #2',
-	// 		),
+	// 		// 'my_custom_field' => array(
+	// 		// 	'type' => 'meta',
+	// 		// 	// 'cast' => 'int',
+	// 		// 	// 'default' => '15',
+	// 		// 	// 'description' => 'my custom field #2',
+	// 		// ),
 	// 	),
 
 	// 	'virtual_fields' => array(
@@ -117,7 +117,7 @@ class CustomPostModel
 			if ($name === 'slug')
 			{
 				$value = $this->post->$field;
-				if (substr($value, 0, strlen(static::$config['slug_prefix'])) === static::$config['slug_prefix'])
+				if (strlen($value) > strlen(static::$config['slug_prefix']) && substr($value, 0, strlen(static::$config['slug_prefix'])) === static::$config['slug_prefix'])
 					return substr($value, strlen(static::$config['slug_prefix']));
 				else
 					return '';
