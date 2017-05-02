@@ -267,7 +267,7 @@ class SyntheticPageManager extends \Cinnabar\BasePluginMixin
 	{
 		// error_log("debug template_include_controller: " . $post->post_type);
 		if (isset($this->active_synthetic_page))
-			return $this->app->plugin_dir() . '/Cinnabar/mixins/SyntheticPageManager/twig-template.php';
+			return plugin_dir_path(__FILE__) . 'SyntheticPageManager/twig-template.php';
 		else
 			return $template;
 	}
