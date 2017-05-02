@@ -23,13 +23,6 @@ class CustomPostManager extends \Cinnabar\BasePluginMixin
 		add_action('add_meta_boxes', array($this, 'wordpress_add_meta_boxes'), 10, 2);
 		add_action('save_post', array($this, 'wordpress_save_post'), 10, 2);
 		add_filter('post_type_link', array($this, 'wordpress_post_type_link'), 1, 2);
-		add_filter('admin_enqueue_scripts', array($this, 'wordpress_admin_enqueue_scripts'));
-	}
-
-	public function wordpress_admin_enqueue_scripts()
-	{
-		wp_enqueue_script('jquery');
-		wp_enqueue_script('cinnabar-custom-post-manager-helper', $this->app->plugin_url('/Cinnabar/mixins/CustomPostManager/custom-post-manager-helper.js'));
 	}
 
 	public function wordpress_add_meta_boxes($post_type, $post)

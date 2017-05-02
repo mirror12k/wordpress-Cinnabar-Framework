@@ -13,7 +13,7 @@ class InputHelperLibrary extends \Cinnabar\BasePluginMixin
 	{
 		$this->app->register_admin_scripts(array(
 			'jquery' => null,
-			'input-helper-library' => 'Cinnabar/mixins/InputHelperLibrary/input-helper-library.js',
+			'input-helper-library' => plugin_dir_url(__FILE__) . 'InputHelperLibrary/input-helper-library.js',
 		));
 
 		$this->app->AjaxGatewayManager->register_ajax_actions(array(
