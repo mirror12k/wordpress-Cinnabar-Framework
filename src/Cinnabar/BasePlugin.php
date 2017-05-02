@@ -4,8 +4,6 @@
 
 namespace Cinnabar;
 
-require_once 'BasePluginMixin.php';
-
 class BasePlugin
 {
 	// required member value which matches the directory name of the plugin
