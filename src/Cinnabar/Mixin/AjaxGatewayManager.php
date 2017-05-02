@@ -20,12 +20,12 @@ class AjaxGatewayManager extends \Cinnabar\BasePluginMixin
 	public function register()
 	{
 		$this->register_ajax_validators(array(
-			'is_logged_in_validator' => array('Cinnabar\\AjaxGatewayManager', 'is_logged_in_validator'),
-			'not_null_validator' => array('Cinnabar\\AjaxGatewayManager', 'not_null_validator'),
-			'cast_bool' => array('Cinnabar\\AjaxGatewayManager', 'cast_bool'),
-			'cast_int' => array('Cinnabar\\AjaxGatewayManager', 'cast_int'),
-			'cast_string' => array('Cinnabar\\AjaxGatewayManager', 'cast_string'),
-			'parse_json' => array('Cinnabar\\AjaxGatewayManager', 'parse_json'),
+			'is_logged_in_validator' => array('Cinnabar\\Mixin\\AjaxGatewayManager', 'is_logged_in_validator'),
+			'not_null_validator' => array('Cinnabar\\Mixin\\AjaxGatewayManager', 'not_null_validator'),
+			'cast_bool' => array('Cinnabar\\Mixin\\AjaxGatewayManager', 'cast_bool'),
+			'cast_int' => array('Cinnabar\\Mixin\\AjaxGatewayManager', 'cast_int'),
+			'cast_string' => array('Cinnabar\\Mixin\\AjaxGatewayManager', 'cast_string'),
+			'parse_json' => array('Cinnabar\\Mixin\\AjaxGatewayManager', 'parse_json'),
 		));
 	}
 
