@@ -359,9 +359,13 @@ class CustomUserModel
 		}
 		else
 		{
-			$args['meta_query'][] = array(
-				'key' => 'custom_user_model__user_type',
-				'value' => static::$config['user_type'],
+			$args['meta_query'] = array(
+				'relation' => 'AND',
+				$args['meta_query'],
+				array(
+					'key' => 'custom_user_model__user_type',
+					'value' => static::$config['user_type'],
+				),
 			);
 		}
 
