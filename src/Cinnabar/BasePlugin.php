@@ -125,7 +125,7 @@ class BasePlugin
 		}
 		foreach ($this->global_style_sheets as $name => $style_sheet)
 		{
-			wp_enqueue_script($name, $style_sheet);
+			wp_enqueue_style($name, $style_sheet);
 		}
 	}
 
@@ -140,7 +140,7 @@ class BasePlugin
 		}
 		foreach ($this->admin_style_sheets as $name => $style_sheet)
 		{
-			wp_enqueue_script($name, $style_sheet);
+			wp_enqueue_style($name, $style_sheet);
 		}
 	}
 
