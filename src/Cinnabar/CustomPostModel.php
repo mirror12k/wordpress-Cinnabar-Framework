@@ -394,11 +394,6 @@ class CustomPostModel
 		return $post;
 	}
 
-	array(
-		'relation' => 'AND'
-		'asdf' => 'qwerty'
-	)
-
 	public static function compile_meta_args($args)
 	{
 		$query = array();
@@ -420,6 +415,8 @@ class CustomPostModel
 				);
 			}
 		}
+
+		return $query;
 	}
 
 	public static function list_posts($args=array())
