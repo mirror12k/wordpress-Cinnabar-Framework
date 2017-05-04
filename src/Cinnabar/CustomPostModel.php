@@ -394,11 +394,54 @@ class CustomPostModel
 		return $post;
 	}
 
+	array(
+		'relation' => 'AND'
+		'asdf' => 'qwerty'
+	)
+
+	public static function compile_meta_args($args)
+	{
+		$query = array();
+
+		foreach ($args as $name => $value)
+		{
+			if ($name === 'relation')
+				$query['relation'] = $value;
+			elseif (is_array($value))
+				$query[] = static::compile_meta_args($value);
+			else
+			{
+				if (isset(static::$config['fields'][$name]['cast']))
+					$value = static::cast_value_to_string(static::$config['fields'][$name]['cast'], $value, static::$config['fields'][$name]);
+
+				$query[] = array(
+					'key' => static::$config['post_type'] . '__' . $name,
+					'value' => $value,
+				);
+			}
+		}
+	}
+
 	public static function list_posts($args=array())
 	{
 		$args['post_type'] = static::$config['post_type'];
 		if (!isset($args['posts_per_page']))
 			$args['posts_per_page'] = -1;
+
+		if (isset($args['meta_args']))
+		{
+			$compiled_meta_args = static::compile_meta_args($args['meta_args']);
+			unset($args['meta_args']);
+			if (isset($args['meta_query']))
+				$args['meta_query'] = array(
+					'relation' => 'AND',
+					$args['meta_query'],
+					$compiled_meta_args,
+				);
+			else
+				$args['meta_query'] = $compiled_meta_args;
+		}
+
 
 		// error_log("got list_posts request: " . json_encode($args));
 		$query = new \WP_Query($args);
