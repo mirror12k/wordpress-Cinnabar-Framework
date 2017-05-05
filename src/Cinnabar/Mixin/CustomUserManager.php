@@ -30,7 +30,7 @@ class CustomUserManager extends \Cinnabar\BasePluginMixin
 	public function show_custom_user_profile_fields($user)
 	{
 
-		$custom_user_type = \Cinnabar\\Cinnabar\CustomUserModel::get_user_type($user->ID);
+		$custom_user_type = \Cinnabar\CustomUserModel::get_user_type($user->ID);
 
 		?>
 		<table class="form-table">
