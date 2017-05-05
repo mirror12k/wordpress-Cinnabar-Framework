@@ -116,6 +116,8 @@ class AjaxGatewayManager extends \Cinnabar\BasePluginMixin
 					throw new \Exception("Missing argument: $argument");
 				foreach ($validators as $validator => $args)
 				{
+					if (!isset($this->registered_ajax_validators[$validator]))
+						throw new \Exception("Invalid validator '$validator' specified in ajax action '$action'");
 					$data[$argument] = $this->registered_ajax_validators[$validator]($data, $data[$argument], $args);
 				}
 			}
