@@ -83,11 +83,13 @@ class CustomUserModel
 
 	public function __get($name)
 	{
+		// error_log("debug __get $name"); // DEBUG GETSET
 		if (isset(static::$default_wordpress_user_fields[$name]))
 		{
 			$field = static::$default_wordpress_user_fields[$name];
 			if ($name === 'slug') {
 				$value = $this->userdata->$field;
+				// error_log("debug __get $name: $value"); // DEBUG GETSET
 				if (substr($value, 0, strlen(static::$config['slug_prefix'])) === static::$config['slug_prefix'])
 					return substr($value, strlen(static::$config['slug_prefix']));
 				else
@@ -103,6 +105,7 @@ class CustomUserModel
 			if (static::$config['fields'][$name]['type'] === 'meta')
 			{
 				$value = get_user_meta($this->userdata->ID, static::$config['user_type'] . '__' . $name, true);
+				// error_log("debug __get $name: $value"); // DEBUG GETSET
 
 				if (isset(static::$config['fields'][$name]['cast']))
 					$value = static::cast_value_from_string(static::$config['fields'][$name]['cast'], $value, static::$config['fields'][$name]);
@@ -112,6 +115,7 @@ class CustomUserModel
 			elseif (static::$config['fields'][$name]['type'] === 'meta-array')
 			{
 				$value_array = get_user_meta($this->userdata->ID, static::$config['user_type'] . '__' . $name, false);
+				// error_log("debug __get $name: " . json_encode($value_array)); // DEBUG GETSET
 
 				if (isset(static::$config['fields'][$name]['cast']))
 				{
@@ -137,6 +141,7 @@ class CustomUserModel
 
 	public function __set($name, $value)
 	{
+		// error_log("debug __set $name"); // DEBUG GETSET
 		if (isset(static::$default_wordpress_user_fields[$name]))
 		{
 			$field = static::$default_wordpress_user_fields[$name];
@@ -145,6 +150,7 @@ class CustomUserModel
 			if ($name === 'slug')
 				$value = static::$config['slug_prefix'] . (string)$value;
 
+			// error_log("debug __set $name: $value"); // DEBUG GETSET
 			wp_update_user(array(
 				'ID' => (int)$this->userdata->ID,
 				$field => (string)$value,
@@ -157,6 +163,7 @@ class CustomUserModel
 				if (isset(static::$config['fields'][$name]['cast']))
 					$value = static::cast_value_to_string(static::$config['fields'][$name]['cast'], $value, static::$config['fields'][$name]);
 
+				// error_log("debug __set $name: $value"); // DEBUG GETSET
 				update_user_meta($this->userdata->ID, static::$config['user_type'] . '__' . $name, $value);
 			}
 			elseif (static::$config['fields'][$name]['type'] === 'meta-array')
@@ -174,7 +181,10 @@ class CustomUserModel
 				delete_user_meta($this->userdata->ID, static::$config['user_type'] . '__' . $name);
 
 				foreach ($value_array as $value)
+				{
+					// error_log("debug __set $name: $value"); // DEBUG GETSET
 					add_user_meta($this->userdata->ID, static::$config['user_type'] . '__' . $name, $value, false);
+				}
 
 				return $value_array;
 			}
@@ -182,11 +192,46 @@ class CustomUserModel
 				throw new \Exception("Invalid CPM field type for '$name', to user type " . static::$config['user_type']);
 		}
 		elseif (isset(static::$config['virtual_fields'][$name]))
-			throw new \Exception("Attempt to set virtual property '$name', to object type " . static::$config['post_type']);
+			throw new \Exception("Attempt to set virtual property '$name', to user type " . static::$config['user_type']);
 		else
 			throw new \Exception("Attempt to set unknown property '$name', to user type " . static::$config['user_type']);
 	}
 
+	public function add($name, $value)
+	{
+		if (isset(static::$config['fields'][$name]) && static::$config['fields'][$name]['type'] === 'meta-array')
+		{
+			if (isset(static::$config['fields'][$name]['cast']))
+				$value = static::cast_value_to_string(static::$config['fields'][$name]['cast'], $value, static::$config['fields'][$name]);
+			// error_log("debug add $name: $value"); // DEBUG GETSET
+			add_user_meta($this->userdata->ID, static::$config['user_type'] . '__' . $name, $value, false);
+		}
+		else
+			throw new \Exception("Attempt to add invalid property value '$name', to user type " . static::$config['user_type']);
+
+		// static::$manager->do_cpm_action(get_called_class(), 'changed__' . $name, array($this));
+		// static::$manager->do_cpm_action(get_called_class(), 'added__' . $name, array($this, $value));
+	}
+
+	public function remove($name, $value)
+	{
+		if (isset(static::$config['fields'][$name]) && static::$config['fields'][$name]['type'] === 'meta-array')
+		{
+			if (isset(static::$config['fields'][$name]['cast']))
+				$value = static::cast_value_to_string(static::$config['fields'][$name]['cast'], $value, static::$config['fields'][$name]);
+			// error_log("debug remove $name: $value"); // DEBUG GETSET
+			delete_user_meta($this->userdata->ID, static::$config['user_type'] . '__' . $name, $value);
+		}
+		else
+			throw new \Exception("Attempt to remove invalid property value '$name', to user type " . static::$config['user_type']);
+
+		// static::$manager->do_cpm_action(get_called_class(), 'changed__' . $name, array($this));
+		// static::$manager->do_cpm_action(get_called_class(), 'removed__' . $name, array($this, $value));
+	}
+
+
+			// error_log("debug add $name: $value"); // DEBUG GETSET
+			// error_log("debug remove $name: $value"); // DEBUG GETSET
 
 	public function cast_value_from_string($cast_type, $value, $field)
 	{

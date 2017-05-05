@@ -111,12 +111,14 @@ class CustomPostModel
 
 	public function __get($name)
 	{
+		// error_log("debug __get $name"); // DEBUG GETSET
 		if (isset(static::$default_wordpress_post_fields[$name]))
 		{
 			$field = static::$default_wordpress_post_fields[$name];
 			if ($name === 'slug')
 			{
 				$value = $this->post->$field;
+				// error_log("debug __get $name: $value"); // DEBUG GETSET
 				if (strlen($value) > strlen(static::$config['slug_prefix']) && substr($value, 0, strlen(static::$config['slug_prefix'])) === static::$config['slug_prefix'])
 					return substr($value, strlen(static::$config['slug_prefix']));
 				else
@@ -132,6 +134,7 @@ class CustomPostModel
 			if (static::$config['fields'][$name]['type'] === 'meta')
 			{
 				$value = get_post_meta($this->post->ID, static::$config['post_type'] . '__' . $name, true);
+				// error_log("debug __get $name: $value"); // DEBUG GETSET
 
 				if (isset(static::$config['fields'][$name]['cast']))
 					$value = static::cast_value_from_string(static::$config['fields'][$name]['cast'], $value, static::$config['fields'][$name]);
@@ -141,6 +144,7 @@ class CustomPostModel
 			elseif (static::$config['fields'][$name]['type'] === 'meta-array')
 			{
 				$value_array = get_post_meta($this->post->ID, static::$config['post_type'] . '__' . $name, false);
+				// error_log("debug __get $name: " . json_encode($value_array)); // DEBUG GETSET
 
 				if (isset(static::$config['fields'][$name]['cast']))
 				{
@@ -166,6 +170,7 @@ class CustomPostModel
 
 	public function __set($name, $value)
 	{
+		// error_log("debug __set $name"); // DEBUG GETSET
 		if (isset(static::$default_wordpress_post_fields[$name]))
 		{
 			$field = static::$default_wordpress_post_fields[$name];
@@ -173,6 +178,7 @@ class CustomPostModel
 			if ($name === 'slug')
 				$value = static::$config['slug_prefix'] . (string)$value;
 
+			// error_log("debug __set $name: $value"); // DEBUG GETSET
 			wp_update_post(array(
 				'ID' => (int)$this->post->ID,
 				$field => (string)$value,
@@ -186,6 +192,7 @@ class CustomPostModel
 					$value = static::cast_value_to_string(static::$config['fields'][$name]['cast'], $value, static::$config['fields'][$name]);
 
 				// error_log("debug update_post_meta for " . $this->post->ID . ' field ' . static::$config['post_type'] . '__' . $name);
+				// error_log("debug __set $name: $value"); // DEBUG GETSET
 				update_post_meta($this->post->ID, static::$config['post_type'] . '__' . $name, $value);
 			}
 			elseif (static::$config['fields'][$name]['type'] === 'meta-array')
@@ -203,7 +210,10 @@ class CustomPostModel
 				delete_post_meta($this->post->ID, static::$config['post_type'] . '__' . $name);
 
 				foreach ($value_array as $value)
+				{
+					// error_log("debug __set $name: $value"); // DEBUG GETSET
 					add_post_meta($this->post->ID, static::$config['post_type'] . '__' . $name, $value, false);
+				}
 
 				return $value_array;
 			}
@@ -224,6 +234,7 @@ class CustomPostModel
 		{
 			if (isset(static::$config['fields'][$name]['cast']))
 				$value = static::cast_value_to_string(static::$config['fields'][$name]['cast'], $value, static::$config['fields'][$name]);
+			// error_log("debug add $name: $value"); // DEBUG GETSET
 			add_post_meta($this->post->ID, static::$config['post_type'] . '__' . $name, $value, false);
 		}
 		else
@@ -239,6 +250,7 @@ class CustomPostModel
 		{
 			if (isset(static::$config['fields'][$name]['cast']))
 				$value = static::cast_value_to_string(static::$config['fields'][$name]['cast'], $value, static::$config['fields'][$name]);
+			// error_log("debug remove $name: $value"); // DEBUG GETSET
 			delete_post_meta($this->post->ID, static::$config['post_type'] . '__' . $name, $value);
 		}
 		else
