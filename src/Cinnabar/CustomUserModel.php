@@ -90,7 +90,7 @@ class CustomUserModel
 			if ($name === 'slug') {
 				$value = $this->userdata->$field;
 				// error_log("debug __get $name: $value"); // DEBUG GETSET
-				if (substr($value, 0, strlen(static::$config['slug_prefix'])) === static::$config['slug_prefix'])
+				if (strlen($value) > strlen(static::$config['slug_prefix']) && substr($value, 0, strlen(static::$config['slug_prefix'])) === static::$config['slug_prefix'])
 					return substr($value, strlen(static::$config['slug_prefix']));
 				else
 					return '';
