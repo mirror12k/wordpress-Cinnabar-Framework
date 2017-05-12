@@ -273,7 +273,7 @@ class CustomPostModel
 		elseif ($cast_type === 'option')
 			return (string)$value;
 		elseif ($cast_type === 'json')
-			return json_decode($value);
+			return json_decode($value, true);
 		elseif (isset(static::$config['custom_cast_types']) && isset(static::$config['custom_cast_types'][$cast_type]))
 		{
 			$callback = static::$config['custom_cast_types'][$cast_type]['from_string'];
