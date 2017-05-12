@@ -120,6 +120,15 @@ class CustomPostManager extends \Cinnabar\BasePluginMixin
 				{
 					// error_log("got value for $name: " . json_encode($_POST[$name]));
 					$value = $_POST[$name];
+
+					// stripslashes because wordpress is stupid and adds magic quotes back in
+					if (is_array($value)) {
+						$value = array_map(stripslashes, $value);
+					} else {
+						$value = stripslashes($value);
+					}
+
+					// if the value has a cast, cast it
 					if (isset($field['cast']))
 					{
 						if ($field['type'] === 'meta')
@@ -128,13 +137,9 @@ class CustomPostManager extends \Cinnabar\BasePluginMixin
 						}
 						elseif ($field['type'] === 'meta-array')
 						{
-							if (isset($value))
+							if (isset($value) && $value !== '')
 							{
-								if ($value === '')
-									$value_array = array();
-								else
-									$value_array = $value;
-
+								$value_array = $value;
 								$new_array = array();
 								foreach ($value_array as $value)
 									$new_array[] = $class::cast_value_from_string($field['cast'], $value, $field);
@@ -147,6 +152,7 @@ class CustomPostManager extends \Cinnabar\BasePluginMixin
 						}
 					}
 
+					// assign the value
 					$post->$name = $value;
 				}
 			}

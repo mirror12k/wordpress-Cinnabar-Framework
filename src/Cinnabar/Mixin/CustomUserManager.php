@@ -91,10 +91,17 @@ class CustomUserManager extends \Cinnabar\BasePluginMixin
 
 			foreach ($class::$config['fields'] as $name => $field)
 			{
-				// error_log("got value for $name: " . json_encode($_POST[$name]));
 				if (isset($_POST[$name]))
 				{
+					// error_log("got value for $name: " . json_encode($_POST[$name]));
 					$value = $_POST[$name];
+					
+					// stripslashes because wordpress is stupid and adds magic quotes back in
+					if (is_array($value)) {
+						$value = array_map(stripslashes, $value);
+					} else {
+						$value = stripslashes($value);
+					}
 
 					if ($value === '' && $field['type'] === 'meta-array')
 						$value = array();
