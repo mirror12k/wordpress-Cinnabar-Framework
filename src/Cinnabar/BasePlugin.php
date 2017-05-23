@@ -12,7 +12,8 @@ class BasePlugin
 	// overloadable list of string classes representing the mixins
 	public $mixins = array();
 
-
+	// properties which are allocated by using the various register api functions
+	// dont set these directly
 	public $plugin_options = array();
 	public $default_plugin_options = array();
 
@@ -21,6 +22,8 @@ class BasePlugin
 
 	public $admin_scripts = array();
 	public $admin_style_sheets = array();
+
+	public $admin_menu_bar_items = array();
 
 
 	// entry point, must be called at the start of the plugin to load the application functionality
@@ -69,6 +72,15 @@ class BasePlugin
 			$this->admin_style_sheets[$name] = $style_sheet;
 	}
 
+	public function register_admin_menu_bar_items($items)
+	{
+		foreach ($items as $id => $args)
+		{
+			$args['id'] = $id;
+			$this->admin_menu_bar_items[$id] = $args;
+		}
+	}
+
 
 	// baseplugin functionality	
 	public function load_mixins()
@@ -110,11 +122,14 @@ class BasePlugin
 		add_action('admin_menu', array($this, 'baseplugin_add_options_page'));
 
 		// enqueue global scripts and styles
-		add_action('wp_enqueue_scripts', array($this, 'wordpress_enqueue_scripts'));
-		add_action('admin_enqueue_scripts', array($this, 'wordpress_admin_enqueue_scripts'));
+		add_action('wp_enqueue_scripts', array($this, 'baseplugin_enqueue_scripts'));
+		add_action('admin_enqueue_scripts', array($this, 'baseplugin_admin_enqueue_scripts'));
+
+		// admin menu bar links
+		add_action('admin_bar_menu', array($this, 'baseplugin_admin_bar_add_menus'), 999);
 	}
 
-	public function wordpress_enqueue_scripts()
+	public function baseplugin_enqueue_scripts()
 	{
 		foreach ($this->global_scripts as $name => $script)
 		{
@@ -129,7 +144,7 @@ class BasePlugin
 		}
 	}
 
-	public function wordpress_admin_enqueue_scripts()
+	public function baseplugin_admin_enqueue_scripts()
 	{
 		foreach ($this->admin_scripts as $name => $script)
 		{
@@ -141,6 +156,14 @@ class BasePlugin
 		foreach ($this->admin_style_sheets as $name => $style_sheet)
 		{
 			wp_enqueue_style($name, $style_sheet);
+		}
+	}
+
+	public function baseplugin_admin_bar_add_menus($wp_admin_bar)
+	{
+		foreach ($this->admin_menu_bar_items as $id => $args)
+		{
+			$wp_admin_bar->add_node($args);
 		}
 	}
 
