@@ -167,7 +167,7 @@ class AjaxGatewayManager extends \Cinnabar\BasePluginMixin
 
 	public static function parse_json($data, $value, $args)
 	{
-		return json_decode($value, true);
+		return json_decode(stripslashes($value), true);
 	}
 }
 
