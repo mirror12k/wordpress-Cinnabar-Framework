@@ -290,12 +290,34 @@ class CustomUserModel
 	}
 
 
+	/*
+	* expects a valid user id
+	* casts ANY valid wordpress user to a user model of this type
+	* this allows you to wrap any user in a CSM class
+	* doesn't modify the internal custom_user_model__user_type
+	* returns null or a CSM object of this type
+	*/
+	public static function loose_cast_by_id($userid) {
+		$userdata = get_user_by('id', (int)$userid);
+		if ($userdata !== false)
+			return static::from_userdata($userdata);
+		else
+			return null;
+	}
 
+	/*
+	* expects a valid WP_User object
+	* returns a CSM object of this type, wrapping the wordpress userdata
+	*/
 	public static function from_userdata($userdata)
 	{
 		return new static($userdata);
 	}
 
+	/*
+	* gets the internal user type stored in the user meta
+	* this will match the $config['user_type'] property of the CSM that it was created by
+	*/
 	public static function get_user_type($userid)
 	{
 		return get_user_meta((int)$userid, 'custom_user_model__user_type', true);
