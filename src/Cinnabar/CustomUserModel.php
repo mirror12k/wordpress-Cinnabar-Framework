@@ -229,9 +229,23 @@ class CustomUserModel
 		// static::$manager->do_cpm_action(get_called_class(), 'removed__' . $name, array($this, $value));
 	}
 
+	/*
+	* casts an arbitrary string to a CSM of this type
+	* the string is expected to contain the id of the user
+	*/
+	public static function cast_user_from_string($value, $field=null) {
+		return static::get_by_id((int)$value);
+	}
 
-			// error_log("debug add $name: $value"); // DEBUG GETSET
-			// error_log("debug remove $name: $value"); // DEBUG GETSET
+	/*
+	* casts a CSM of this type to a string containing the id of the user, or '0' if the user is null or not of this type of CSM
+	*/
+	public static function cast_user_to_string($value, $field=null) {
+		if ($value !== null && get_class($value) == get_called_class())
+			return (string)($value->id);
+		else
+			return '0';
+	}
 
 	public function cast_value_from_string($cast_type, $value, $field)
 	{

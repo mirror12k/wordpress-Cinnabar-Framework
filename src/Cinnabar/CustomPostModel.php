@@ -260,6 +260,24 @@ class CustomPostModel
 		static::$manager->do_cpm_action(get_called_class(), 'removed__' . $name, array($this, $value));
 	}
 
+	/*
+	* casts an arbitrary string to a CPM of this type
+	* the string is expected to contain the id of the post
+	*/
+	public static function cast_post_from_string($value, $field=null) {
+		return static::get_by_id((int)$value);
+	}
+
+	/*
+	* casts a CPM of this type to a string containing the id of the object, or '0' if the object is null or not of this type of CPM
+	*/
+	public static function cast_post_to_string($value, $field=null) {
+		if ($value !== null && get_class($value) == get_called_class())
+			return (string)($value->id);
+		else
+			return '0';
+	}
+
 	public static function cast_value_from_string($cast_type, $value, $field, $class='')
 	{
 		if ($cast_type === 'bool')
