@@ -257,7 +257,7 @@ class SyntheticPageManager extends \Cinnabar\BasePluginMixin
 			if (isset($this->active_synthetic_page['view_controller']))
 			{
 				$this->active_view_controller = new $this->active_synthetic_page['view_controller']($this->app, $this->active_synthetic_page);
-
+				$this->active_view_controller->template_action();
 				$this->active_view_controller->template_redirect();
 			}
 		}
