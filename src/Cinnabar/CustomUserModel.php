@@ -230,6 +230,17 @@ class CustomUserModel
 	}
 
 	/*
+	* cast the value from an integer id to a CSM of this type
+	* throws an exception if the value does not correspond to a valid CSM of this type
+	*/
+	public static function cast_validator($data, $value, $args) {
+		$obj = static::get_by_id((int)$value);
+		if ($obj === null)
+			throw new \Exception("invalid " . static::$config['user_type'] . ": $value");
+		return $obj;
+	}
+
+	/*
 	* casts an arbitrary string to a CSM of this type
 	* the string is expected to contain the id of the user
 	*/

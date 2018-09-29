@@ -261,6 +261,17 @@ class CustomPostModel
 	}
 
 	/*
+	* cast the value from an integer id to a CPM of this type
+	* throws an exception if the value does not correspond to a valid CPM of this type
+	*/
+	public static function cast_validator($data, $value, $args) {
+		$obj = static::get_by_id((int)$value);
+		if ($obj === null)
+			throw new \Exception("invalid " . static::$config['post_type'] . ": $value");
+		return $obj;
+	}
+
+	/*
 	* casts an arbitrary string to a CPM of this type
 	* the string is expected to contain the id of the post
 	*/
