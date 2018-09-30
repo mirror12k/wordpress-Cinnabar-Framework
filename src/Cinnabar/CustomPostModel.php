@@ -214,8 +214,6 @@ class CustomPostModel
 					// error_log("debug __set $name: $value"); // DEBUG GETSET
 					add_post_meta($this->post->ID, static::$config['post_type'] . '__' . $name, $value, false);
 				}
-
-				return $value_array;
 			}
 			else
 				throw new \Exception("Invalid CPM field type for '$name', to object type " . static::$config['post_type']);
@@ -258,6 +256,20 @@ class CustomPostModel
 
 		static::$manager->do_cpm_action(get_called_class(), 'changed__' . $name, array($this));
 		static::$manager->do_cpm_action(get_called_class(), 'removed__' . $name, array($this, $value));
+	}
+
+	public function contains($name, $value)
+	{
+		if (isset(static::$config['fields'][$name]) && static::$config['fields'][$name]['type'] === 'meta-array')
+		{
+			if (isset(static::$config['fields'][$name]['cast']))
+				$value = static::cast_value_to_string(static::$config['fields'][$name]['cast'], $value, static::$config['fields'][$name]);
+			// error_log("debug contains $name: $value"); // DEBUG GETSET
+			$value_array = get_post_meta($this->post->ID, static::$config['post_type'] . '__' . $name, false);
+			return in_array($value, $value_array);
+		}
+		else
+			throw new \Exception("Attempt to contains() invalid property value '$name', to object type " . static::$config['post_type']);
 	}
 
 	/*
