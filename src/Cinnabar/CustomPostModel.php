@@ -510,6 +510,10 @@ class CustomPostModel
 			register_post_type(static::$config['post_type'], static::$config['registration_properties']);
 		}
 
+		foreach (static::$config['fields'] as $name => $field)
+			if (isset($field['on_change']))
+				static::$manager->on_cpm_action(get_called_class(), 'changed__' . $name, $field['on_change']);
+
 		add_action('transition_post_status', array(get_called_class(), 'on_all_status_transitions'), 10, 3);
 	}
 
