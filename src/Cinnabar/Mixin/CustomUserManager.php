@@ -208,6 +208,12 @@ class CustomUserManager extends \Cinnabar\BasePluginMixin
 			<input type='checkbox' class='field-name-holder' <?php echo ($is_template ? '' : "name='" . htmlspecialchars($input_name) . "'"); ?> value='1' <?php echo (1 == $value ? "checked='checked'" : ""); ?> />
 			<?php
 		}
+		elseif (isset($field['cast']) && $field['cast'] === 'string' && $field['input_format'] === 'textarea')
+		{
+			?>
+			<textarea type="text" class='field-name-holder' <?php echo ($is_template ? '' : "name='" . htmlspecialchars($input_name) . "'"); ?> style="width: 100%; height: 200px"><?php echo htmlspecialchars($value); ?></textarea>
+			<?php
+		}
 		elseif (isset($field['cast']) && ($field['cast'] === 'int' || $field['cast'] === 'string'))
 		{
 			?>
@@ -223,6 +229,12 @@ class CustomUserManager extends \Cinnabar\BasePluginMixin
 					<option value="<?php echo htmlspecialchars($key); ?>" <?php echo ($key === $value ? "selected='selected'" : ""); ?>><?php echo htmlentities($desc); ?></option>
 				<?php } ?>
 			</select>
+			<?php
+		}
+		elseif (isset($field['cast']) && $field['cast'] === 'json')
+		{
+			?>
+			<input type="text" class='field-name-holder' <?php echo ($is_template ? '' : "name='" . htmlspecialchars($input_name) . "'"); ?> value="<?php echo json_encode($value); ?>" />
 			<?php
 		}
 		elseif (isset($field['cast']) && isset($class::$config['custom_cast_types']) && isset($class::$config['custom_cast_types'][$field['cast']]))

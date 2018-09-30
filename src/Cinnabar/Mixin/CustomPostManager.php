@@ -31,17 +31,19 @@ class CustomPostManager extends \Cinnabar\BasePluginMixin
 		$class = $this->get_custom_post_class_by_post_type($post_type);
 		if (isset($class))
 		{
-			add_meta_box(
-				$class::$config['post_type'] . '-slug',
-				__( 'Post Slug', $class::$config['post_type']),
-				function ($post) use ($self, $class) {
-					$post = $class::from_post($post);
-					$self->render_slug_field($post, $class);
-				},
-				$class::$config['post_type'],
-				'normal',
-				'default'
-			);
+			if (isset($class::$config['field_groups']['add_post_slug']) && $class::$config['field_groups']['add_post_slug']) {
+				add_meta_box(
+					$class::$config['post_type'] . '-slug',
+					__( 'Post Slug', $class::$config['post_type']),
+					function ($post) use ($self, $class) {
+						$post = $class::from_post($post);
+						$self->render_slug_field($post, $class);
+					},
+					$class::$config['post_type'],
+					'normal',
+					'default'
+				);
+			}
 
 			if (isset($class::$config['field_groups']))
 			{
@@ -112,7 +114,9 @@ class CustomPostManager extends \Cinnabar\BasePluginMixin
 		{
 			$post = $class::from_post($post);
 			
-			$post->slug = $_POST['slug'];
+			if (isset($_POST['slug'])) {
+				$post->slug = $_POST['slug'];
+			}
 
 			foreach ($class::$config['fields'] as $name => $field)
 			{
@@ -269,6 +273,12 @@ class CustomPostManager extends \Cinnabar\BasePluginMixin
 		{
 			?>
 			<input type='checkbox' class='field-name-holder' <?php echo ($is_template ? '' : "name='" . htmlspecialchars($input_name) . "'"); ?> value='1' <?php echo (1 == $value ? "checked='checked'" : ""); ?> />
+			<?php
+		}
+		elseif (isset($field['cast']) && $field['cast'] === 'string' && $field['input_format'] === 'textarea')
+		{
+			?>
+			<textarea type="text" class='field-name-holder' <?php echo ($is_template ? '' : "name='" . htmlspecialchars($input_name) . "'"); ?> style="width: 100%; height: 200px"><?php echo htmlspecialchars($value); ?></textarea>
 			<?php
 		}
 		elseif (isset($field['cast']) && ($field['cast'] === 'int' || $field['cast'] === 'string'))
