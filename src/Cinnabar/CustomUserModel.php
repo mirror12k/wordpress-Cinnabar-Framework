@@ -321,11 +321,20 @@ class CustomUserModel
 			throw new \Exception("Unknown cast type '$cast_type' requested, from user type " . static::$config['user_type']);
 	}
 
-	public function login_user()
-	{
-		wp_set_auth_cookie($this->id, false, is_ssl());
+	/*
+	* checks the given password against the hashed user password
+	* returns true if password is correct
+	*/
+	public function check_password($password) {
+		return wp_check_password($password, $this->pass);
 	}
 
+	/*
+	* sets the current logged-in user to be this user
+	*/
+	public function login_user() {
+		wp_set_auth_cookie($this->id, false, is_ssl());
+	}
 
 	/*
 	* expects a valid user id
