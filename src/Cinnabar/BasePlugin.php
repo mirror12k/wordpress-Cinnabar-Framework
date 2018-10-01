@@ -331,9 +331,14 @@ class BasePlugin
 		return plugins_url() . '/' . $this->plugin_name . $suffix;
 	}
 
+	public function site_url($suffix='')
+	{
+		return site_url() . $suffix;
+	}
+
 	public function redirect_home($suffix='')
 	{
-		$this->redirect(site_url() . $suffix);
+		$this->redirect($this->site_url($suffix));
 	}
 
 	public function redirect($location)
