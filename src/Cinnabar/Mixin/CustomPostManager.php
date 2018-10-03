@@ -241,7 +241,7 @@ class CustomPostManager extends \Cinnabar\BasePluginMixin
 						echo "<div class='input-array-template' style='display: none;'>";
 						echo "<div class='input-array-field'>";
 						$this->render_meta_input($class, $field, '', '', true);
-						echo "<button type='button' class='input-array-remove-button'>X</button>";
+						// echo "<button type='button' class='input-array-remove-button'>X</button>";
 						echo "</div>";
 						echo "</div>";
 						echo "<div class='input-array-container'>";
@@ -250,12 +250,12 @@ class CustomPostManager extends \Cinnabar\BasePluginMixin
 							{
 								echo "<div class='input-array-field'>";
 								$this->render_meta_input($class, $field, $name . '[' . $i . ']', $value_array[$i]);
-								echo "<button type='button' class='input-array-remove-button'>X</button>";
+								// echo "<button type='button' class='input-array-remove-button'>X</button>";
 								echo "</div>";
 							}
 
 						echo "</div>";
-						echo "<button type='button' class='input-array-add-button'>+</button>";
+						echo "<a type='button' class='button input-array-add-button' style='display: inline-block;'>Add</a>";
 						echo "</div>";
 					}
 				?>

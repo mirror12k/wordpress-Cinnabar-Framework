@@ -62,9 +62,13 @@ jQuery(function ($) {
 								var value = tab.data('value');
 
 								container.find('.dynamic-input-selected').empty();
+								container.find('.dynamic-input-selected').show();
 								container.find('.dynamic-input-selected').append(tab.clone());
 								container.find('.dynamic-input-field').attr('value', value);
 								container.find('.dynamic-input-search-results').empty();
+								container.find('.dynamic-input-search').attr('value', '');
+								container.find('.dynamic-input-search').hide();
+								container.find('.dynamic-input-clear').show();
 							}).bind(undefined, tab));
 							container.find('.dynamic-input-search-results').append(tab);
 						}
@@ -77,7 +81,10 @@ jQuery(function ($) {
 				e.stopPropagation();
 
 				container.find('.dynamic-input-selected').empty();
+				container.find('.dynamic-input-selected').hide();
 				container.find('.dynamic-input-field').attr('value', '');
+				container.find('.dynamic-input-search').show();
+				container.find('.dynamic-input-clear').hide();
 			});
 		});
 	}
