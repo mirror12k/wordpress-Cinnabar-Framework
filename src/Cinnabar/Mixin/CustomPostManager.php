@@ -255,7 +255,7 @@ class CustomPostManager extends \Cinnabar\BasePluginMixin
 							}
 
 						echo "</div>";
-						echo "<a type='button' class='button input-array-add-button' style='display: inline-block;'><span class='dashicons dashicons-plus'></span></a>";
+						echo "<a type='button' class='button input-array-add-button' style='display: inline-block;'><span class='dashicons dashicons-plus' style='vertical-align: middle'></span></a>";
 						echo "</div>";
 					}
 				?>
