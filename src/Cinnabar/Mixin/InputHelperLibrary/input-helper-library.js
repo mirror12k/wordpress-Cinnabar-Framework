@@ -69,6 +69,7 @@ jQuery(function ($) {
 								container.find('.dynamic-input-search').attr('value', '');
 								container.find('.dynamic-input-search').hide();
 								container.find('.dynamic-input-clear').show();
+								container.find('.dynamic-input-item-link').show();
 							}).bind(undefined, tab));
 							container.find('.dynamic-input-search-results').append(tab);
 						}
@@ -85,6 +86,14 @@ jQuery(function ($) {
 				container.find('.dynamic-input-field').attr('value', '');
 				container.find('.dynamic-input-search').show();
 				container.find('.dynamic-input-clear').hide();
+				container.find('.dynamic-input-item-link').hide();
+			});
+
+			container.find('.dynamic-input-item-link').click(function (e) {
+				e.preventDefault();
+				e.stopPropagation();
+
+				window.location = '/wp-admin/post.php?post=' + container.find('.dynamic-input-field').attr('value') + '&action=edit';
 			});
 		});
 	}
