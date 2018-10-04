@@ -99,7 +99,8 @@ class SyntheticPageManager extends \Cinnabar\BasePluginMixin
 			'query_var' => true,
 			'can_export' => true,
 			'rewrite' => array('slug' => false),
-			'capability_type' => 'page'
+			'capability_type' => 'page',
+			'menu_icon'   => 'dashicons-admin-page',
 		));
 	}
 
