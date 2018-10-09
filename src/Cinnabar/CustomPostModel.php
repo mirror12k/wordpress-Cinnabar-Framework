@@ -527,6 +527,9 @@ class CustomPostModel
 				static::$manager->on_cpm_action(get_called_class(), 'changed__' . $name, $field['on_change']);
 
 		add_action('transition_post_status', array(get_called_class(), 'on_all_status_transitions'), 10, 3);
+		
+		add_filter('manage_' . static::$config['post_type'] . '_posts_columns', array(get_called_class(), 'manage_posts_columns'));
+		add_action('manage_' . static::$config['post_type'] . '_posts_custom_column', array(get_called_class(), 'manage_posts_custom_column'), 10, 2);
 	}
 
 	public static function on_all_status_transitions($new_status, $old_status, $post) {
@@ -547,6 +550,28 @@ class CustomPostModel
 			}
 
 		static::$manager->do_cpm_action(get_called_class(), 'new', array($post));
+	}
+
+	public static function manage_posts_columns($columns) {
+		if (isset(static::$config['data_columns'])) {
+			foreach (static::$config['data_columns'] as $key => $column_data) {
+				$columns[$key] = $column_data['title'];
+			}
+		}
+
+		return $columns;
+	}
+
+	public static function manage_posts_custom_column($column, $post_id) {
+		// does this belong to us?
+		if (isset(static::$config['data_columns']) && isset(static::$config['data_columns'][$column])) {
+			// get which column and post this is
+			$column_data = static::$config['data_columns'][$column];
+			$post = static::get_by_id($post_id);
+
+			// call the callback for that column
+			$column_data['callback']($post);
+		}
 	}
 }
 
