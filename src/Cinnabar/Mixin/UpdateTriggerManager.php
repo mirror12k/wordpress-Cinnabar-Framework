@@ -1,8 +1,10 @@
 <?php
 
-
-
 namespace Cinnabar\Mixin;
+
+
+// wordpress is doing dumb things again where get_plugin_data isn't defined even in wordpress_loaded
+require_once ABSPATH . '/wp-admin/includes/plugin.php';
 
 class UpdateTriggerManager extends \Cinnabar\BasePluginMixin
 {
@@ -36,7 +38,7 @@ class UpdateTriggerManager extends \Cinnabar\BasePluginMixin
 
 	public function wordpress_loaded()
 	{
-		if (is_admin() && function_exists('get_plugin_data'))
+		if (is_admin())
 		{
 			$this->update_update_triggers();
 		}
