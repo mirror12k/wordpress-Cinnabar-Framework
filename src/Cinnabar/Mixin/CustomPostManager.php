@@ -301,7 +301,7 @@ class CustomPostManager extends \Cinnabar\BasePluginMixin
 		elseif (isset($field['cast']) && $field['cast'] === 'json')
 		{
 			?>
-			<input type="text" class='field-name-holder' <?php echo ($is_template ? '' : "name='" . htmlspecialchars($input_name) . "'"); ?> value="<?php echo json_encode($value); ?>" />
+			<input type="text" class='field-name-holder' <?php echo ($is_template ? '' : "name='" . htmlspecialchars($input_name) . "'"); ?> value="<?php echo htmlspecialchars(json_encode($value)); ?>" />
 			<?php
 		}
 		elseif (isset($field['cast']) && isset($class::$config['custom_cast_types']) && isset($class::$config['custom_cast_types'][$field['cast']]))
