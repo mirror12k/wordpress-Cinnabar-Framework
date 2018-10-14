@@ -103,8 +103,29 @@ class CustomUserManager extends \Cinnabar\BasePluginMixin
 						$value = stripslashes($value);
 					}
 
-					if ($value === '' && $field['type'] === 'meta-array')
-						$value = array();
+					// if the value has a cast, cast it
+					if (isset($field['cast']))
+					{
+						if ($field['type'] === 'meta')
+						{
+							$value = $class::cast_value_from_string($field['cast'], $value, $field);
+						}
+						elseif ($field['type'] === 'meta-array')
+						{
+							if (isset($value) && $value !== '')
+							{
+								$value_array = $value;
+								$new_array = array();
+								foreach ($value_array as $value)
+									$new_array[] = $class::cast_value_from_string($field['cast'], $value, $field);
+								$value = $new_array;
+							}
+							else
+							{
+								$value = array();
+							}
+						}
+					}
 					
 					$user->$name = $value;
 				}
@@ -218,6 +239,12 @@ class CustomUserManager extends \Cinnabar\BasePluginMixin
 		{
 			?>
 			<input type="text" class='field-name-holder' <?php echo ($is_template ? '' : "name='" . htmlspecialchars($input_name) . "'"); ?> value="<?php echo htmlspecialchars($value); ?>" />
+			<?php
+		}
+		elseif (isset($field['cast']) && ($field['cast'] === 'color'))
+		{
+			?>
+			<input type="color" class='field-name-holder' <?php echo ($is_template ? '' : "name='" . htmlspecialchars($input_name) . "'"); ?> value="<?php echo htmlspecialchars($value); ?>" />
 			<?php
 		}
 		elseif (isset($field['cast']) && $field['cast'] === 'option')

@@ -137,7 +137,7 @@ class CustomPostManager extends \Cinnabar\BasePluginMixin
 					{
 						if ($field['type'] === 'meta')
 						{
-							$value = $class::cast_value_from_string($field['cast'], $value, $field, $class);
+							$value = $class::cast_value_from_string($field['cast'], $value, $field);
 						}
 						elseif ($field['type'] === 'meta-array')
 						{
@@ -285,6 +285,12 @@ class CustomPostManager extends \Cinnabar\BasePluginMixin
 		{
 			?>
 			<input type="text" class='field-name-holder' <?php echo ($is_template ? '' : "name='" . htmlspecialchars($input_name) . "'"); ?> value="<?php echo htmlspecialchars($value); ?>" />
+			<?php
+		}
+		elseif (isset($field['cast']) && ($field['cast'] === 'color'))
+		{
+			?>
+			<input type="color" class='field-name-holder' <?php echo ($is_template ? '' : "name='" . htmlspecialchars($input_name) . "'"); ?> value="<?php echo htmlspecialchars($value); ?>" />
 			<?php
 		}
 		elseif (isset($field['cast']) && $field['cast'] === 'option')

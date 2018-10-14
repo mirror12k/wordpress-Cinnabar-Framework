@@ -270,7 +270,7 @@ class CustomUserModel
 			return '0';
 	}
 
-	public function cast_value_from_string($cast_type, $value, $field)
+	public static function cast_value_from_string($cast_type, $value, $field)
 	{
 		if ($cast_type === 'bool')
 			return (bool)$value;
@@ -279,6 +279,8 @@ class CustomUserModel
 		elseif ($cast_type === 'float')
 			return (float)$value;
 		elseif ($cast_type === 'string')
+			return (string)$value;
+		elseif ($cast_type === 'color')
 			return (string)$value;
 		elseif ($cast_type === 'option')
 			return (string)$value;
@@ -293,7 +295,7 @@ class CustomUserModel
 			throw new \Exception("Unknown cast type '$cast_type' requested, from user type " . static::$config['user_type']);
 	}
 
-	public function cast_value_to_string($cast_type, $value, $field)
+	public static function cast_value_to_string($cast_type, $value, $field)
 	{
 		if ($cast_type === 'bool')
 			return (string)$value;
@@ -303,6 +305,13 @@ class CustomUserModel
 			return (string)$value;
 		elseif ($cast_type === 'string')
 			return (string)$value;
+		elseif ($cast_type === 'color')
+		{
+			if (preg_match('/\A(\#[0-9a-fA-F]{3}|\#[0-9a-fA-F]{6}|\#[0-9a-fA-F]{8})\Z/', $value))
+				return (string)$value;
+			else
+				return '';
+		}
 		elseif ($cast_type === 'option')
 		{
 			if (array_key_exists((string)$value, $field['option_values']))
