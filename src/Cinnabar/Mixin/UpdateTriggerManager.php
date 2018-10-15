@@ -13,6 +13,7 @@ class UpdateTriggerManager extends \Cinnabar\BasePluginMixin
 	// // must be defined in the main plugin class with a valid version history
 	// public $version_history = array(
 	// 	'0.0.1',
+	// 	'0.0.2',
 	// );
 
 	public $scheduled_version_update = null;
@@ -28,8 +29,9 @@ class UpdateTriggerManager extends \Cinnabar\BasePluginMixin
 				'title' => 'Cinnabar Update Trigger Manager Section',
 				'fields' => array(
 					'cinnabar-update-trigger-manager-active-plugin-version' => array(
-						'label' => 'currently active plugin version (DO NOT EDIT)',
+						'label' => 'currently active plugin version',
 						'default' => $this->app->version_history[0],
+						'option_type' => 'disabled',
 					),
 				),
 			),
