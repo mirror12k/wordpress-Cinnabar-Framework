@@ -19,6 +19,7 @@ jQuery(function ($) {
 	function add_input_field(input_array, e) {
 		var field = $(input_array).find('.input-array-template .input-array-field').clone();
 		hook_dynamic_input_containers(field);
+		hook_color_field_values(field);
 
 		field.find('.input-array-remove-button').click(remove_input_field.bind(undefined, input_array, field));
 		$(input_array).find('.input-array-container').append(field);
@@ -98,5 +99,18 @@ jQuery(function ($) {
 		});
 	}
 
+	function hook_color_field_values(dom) {
+
+		dom.find('.field-name-holder[type="color"]').on('change', function () {
+			var name = $(this).attr('name');
+			$('.field-color-value[for="' + name + '"]').val($(this).val());
+		});
+		dom.find('.field-color-value').on('change', function () {
+			var name = $(this).attr('for');
+			$('.field-name-holder[type="color"][name="' + name + '"]').val($(this).val());
+		});
+	}
+
 	hook_dynamic_input_containers($(document.body));
+	hook_color_field_values($(document.body));
 });

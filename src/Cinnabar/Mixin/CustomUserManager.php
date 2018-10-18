@@ -246,6 +246,8 @@ class CustomUserManager extends \Cinnabar\BasePluginMixin
 			?>
 			<input type="color" class='field-name-holder' <?php echo ($is_template ? '' : "name='" . htmlspecialchars($input_name) . "'"); ?> value="<?php echo htmlspecialchars($value); ?>"
 				style="border-radius: 5px; min-height: 40px; min-width: 40px;" />
+			<input type="text" class='field-color-value' for='<?php echo (htmlspecialchars($input_name)); ?>' value="<?php echo htmlspecialchars($value); ?>"
+				style="border-radius: 5px; min-height: 40px; min-width: 40px;" />
 			<?php
 		}
 		elseif (isset($field['cast']) && $field['cast'] === 'option')
