@@ -234,6 +234,8 @@ class BasePlugin
 		$setting = $args['setting_name'];
 		if (isset($args['setting_args']['option_type']) && $args['setting_args']['option_type'] === 'boolean')
 			echo "<input type='checkbox' name='$setting' id='$setting' value='1' " . (1 == get_option($setting) ? "checked='checked'" : "") . " />";
+		elseif (isset($args['setting_args']['option_type']) && $args['setting_args']['option_type'] === 'disabled')
+			echo "<input type='text' name='$setting' id='$setting' value='" . htmlentities(get_option($setting)) . "' disabled />";
 		else
 			echo "<input type='text' name='$setting' id='$setting' value='" . htmlentities(get_option($setting)) . "' />";
 
@@ -331,9 +333,14 @@ class BasePlugin
 		return plugins_url() . '/' . $this->plugin_name . $suffix;
 	}
 
+	public function site_url($suffix='')
+	{
+		return site_url() . $suffix;
+	}
+
 	public function redirect_home($suffix='')
 	{
-		$this->redirect(site_url() . $suffix);
+		$this->redirect($this->site_url($suffix));
 	}
 
 	public function redirect($location)

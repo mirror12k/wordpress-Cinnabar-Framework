@@ -19,6 +19,7 @@ jQuery(function ($) {
 	function add_input_field(input_array, e) {
 		var field = $(input_array).find('.input-array-template .input-array-field').clone();
 		hook_dynamic_input_containers(field);
+		hook_color_field_values(field);
 
 		field.find('.input-array-remove-button').click(remove_input_field.bind(undefined, input_array, field));
 		$(input_array).find('.input-array-container').append(field);
@@ -62,9 +63,14 @@ jQuery(function ($) {
 								var value = tab.data('value');
 
 								container.find('.dynamic-input-selected').empty();
+								container.find('.dynamic-input-selected').show();
 								container.find('.dynamic-input-selected').append(tab.clone());
 								container.find('.dynamic-input-field').attr('value', value);
 								container.find('.dynamic-input-search-results').empty();
+								container.find('.dynamic-input-search').attr('value', '');
+								container.find('.dynamic-input-search').hide();
+								container.find('.dynamic-input-clear').show();
+								container.find('.dynamic-input-item-link').show();
 							}).bind(undefined, tab));
 							container.find('.dynamic-input-search-results').append(tab);
 						}
@@ -77,10 +83,34 @@ jQuery(function ($) {
 				e.stopPropagation();
 
 				container.find('.dynamic-input-selected').empty();
+				container.find('.dynamic-input-selected').hide();
 				container.find('.dynamic-input-field').attr('value', '');
+				container.find('.dynamic-input-search').show();
+				container.find('.dynamic-input-clear').hide();
+				container.find('.dynamic-input-item-link').hide();
+			});
+
+			container.find('.dynamic-input-item-link').click(function (e) {
+				e.preventDefault();
+				e.stopPropagation();
+
+				window.location = '/wp-admin/post.php?post=' + container.find('.dynamic-input-field').attr('value') + '&action=edit';
 			});
 		});
 	}
 
+	function hook_color_field_values(dom) {
+
+		dom.find('.field-name-holder[type="color"]').on('change', function () {
+			var name = $(this).attr('name');
+			$('.field-color-value[for="' + name + '"]').val($(this).val());
+		});
+		dom.find('.field-color-value').on('change', function () {
+			var name = $(this).attr('for');
+			$('.field-name-holder[type="color"][name="' + name + '"]').val($(this).val());
+		});
+	}
+
 	hook_dynamic_input_containers($(document.body));
+	hook_color_field_values($(document.body));
 });

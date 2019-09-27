@@ -31,17 +31,19 @@ class CustomPostManager extends \Cinnabar\BasePluginMixin
 		$class = $this->get_custom_post_class_by_post_type($post_type);
 		if (isset($class))
 		{
-			add_meta_box(
-				$class::$config['post_type'] . '-slug',
-				__( 'Post Slug', $class::$config['post_type']),
-				function ($post) use ($self, $class) {
-					$post = $class::from_post($post);
-					$self->render_slug_field($post, $class);
-				},
-				$class::$config['post_type'],
-				'normal',
-				'default'
-			);
+			if (isset($class::$config['field_groups']['add_post_slug']) && $class::$config['field_groups']['add_post_slug']) {
+				add_meta_box(
+					$class::$config['post_type'] . '-slug',
+					__( 'Post Slug', $class::$config['post_type']),
+					function ($post) use ($self, $class) {
+						$post = $class::from_post($post);
+						$self->render_slug_field($post, $class);
+					},
+					$class::$config['post_type'],
+					'normal',
+					'default'
+				);
+			}
 
 			if (isset($class::$config['field_groups']))
 			{
@@ -112,7 +114,9 @@ class CustomPostManager extends \Cinnabar\BasePluginMixin
 		{
 			$post = $class::from_post($post);
 			
-			$post->slug = $_POST['slug'];
+			if (isset($_POST['slug'])) {
+				$post->slug = $_POST['slug'];
+			}
 
 			foreach ($class::$config['fields'] as $name => $field)
 			{
@@ -133,7 +137,7 @@ class CustomPostManager extends \Cinnabar\BasePluginMixin
 					{
 						if ($field['type'] === 'meta')
 						{
-							$value = $class::cast_value_from_string($field['cast'], $value, $field, $class);
+							$value = $class::cast_value_from_string($field['cast'], $value, $field);
 						}
 						elseif ($field['type'] === 'meta-array')
 						{
@@ -237,7 +241,7 @@ class CustomPostManager extends \Cinnabar\BasePluginMixin
 						echo "<div class='input-array-template' style='display: none;'>";
 						echo "<div class='input-array-field'>";
 						$this->render_meta_input($class, $field, '', '', true);
-						echo "<button type='button' class='input-array-remove-button'>X</button>";
+						// echo "<button type='button' class='input-array-remove-button'>X</button>";
 						echo "</div>";
 						echo "</div>";
 						echo "<div class='input-array-container'>";
@@ -246,12 +250,12 @@ class CustomPostManager extends \Cinnabar\BasePluginMixin
 							{
 								echo "<div class='input-array-field'>";
 								$this->render_meta_input($class, $field, $name . '[' . $i . ']', $value_array[$i]);
-								echo "<button type='button' class='input-array-remove-button'>X</button>";
+								// echo "<button type='button' class='input-array-remove-button'>X</button>";
 								echo "</div>";
 							}
 
 						echo "</div>";
-						echo "<button type='button' class='input-array-add-button'>+</button>";
+						echo "<a type='button' class='button input-array-add-button' style='display: inline-block;'><span class='dashicons dashicons-plus' style='vertical-align: middle'></span></a>";
 						echo "</div>";
 					}
 				?>
@@ -271,10 +275,25 @@ class CustomPostManager extends \Cinnabar\BasePluginMixin
 			<input type='checkbox' class='field-name-holder' <?php echo ($is_template ? '' : "name='" . htmlspecialchars($input_name) . "'"); ?> value='1' <?php echo (1 == $value ? "checked='checked'" : ""); ?> />
 			<?php
 		}
+		elseif (isset($field['cast']) && $field['cast'] === 'string' && $field['input_format'] === 'textarea')
+		{
+			?>
+			<textarea type="text" class='field-name-holder' <?php echo ($is_template ? '' : "name='" . htmlspecialchars($input_name) . "'"); ?> style="width: 100%; height: 200px"><?php echo htmlspecialchars($value); ?></textarea>
+			<?php
+		}
 		elseif (isset($field['cast']) && ($field['cast'] === 'int' || $field['cast'] === 'string'))
 		{
 			?>
 			<input type="text" class='field-name-holder' <?php echo ($is_template ? '' : "name='" . htmlspecialchars($input_name) . "'"); ?> value="<?php echo htmlspecialchars($value); ?>" />
+			<?php
+		}
+		elseif (isset($field['cast']) && ($field['cast'] === 'color'))
+		{
+			?>
+			<input type="color" class='field-name-holder' <?php echo ($is_template ? '' : "name='" . htmlspecialchars($input_name) . "'"); ?> value="<?php echo htmlspecialchars($value); ?>"
+				style="border-radius: 5px; min-height: 40px; min-width: 40px;" />
+			<input type="text" class='field-color-value' for='<?php echo (htmlspecialchars($input_name)); ?>' value="<?php echo htmlspecialchars($value); ?>"
+				style="border-radius: 5px; min-height: 40px; min-width: 40px;" />
 			<?php
 		}
 		elseif (isset($field['cast']) && $field['cast'] === 'option')
@@ -291,7 +310,7 @@ class CustomPostManager extends \Cinnabar\BasePluginMixin
 		elseif (isset($field['cast']) && $field['cast'] === 'json')
 		{
 			?>
-			<input type="text" class='field-name-holder' <?php echo ($is_template ? '' : "name='" . htmlspecialchars($input_name) . "'"); ?> value="<?php echo json_encode($value); ?>" />
+			<input type="text" class='field-name-holder' <?php echo ($is_template ? '' : "name='" . htmlspecialchars($input_name) . "'"); ?> value="<?php echo htmlspecialchars(json_encode($value)); ?>" />
 			<?php
 		}
 		elseif (isset($field['cast']) && isset($class::$config['custom_cast_types']) && isset($class::$config['custom_cast_types'][$field['cast']]))

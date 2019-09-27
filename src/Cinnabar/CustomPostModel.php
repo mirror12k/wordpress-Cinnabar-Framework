@@ -214,8 +214,6 @@ class CustomPostModel
 					// error_log("debug __set $name: $value"); // DEBUG GETSET
 					add_post_meta($this->post->ID, static::$config['post_type'] . '__' . $name, $value, false);
 				}
-
-				return $value_array;
 			}
 			else
 				throw new \Exception("Invalid CPM field type for '$name', to object type " . static::$config['post_type']);
@@ -260,7 +258,50 @@ class CustomPostModel
 		static::$manager->do_cpm_action(get_called_class(), 'removed__' . $name, array($this, $value));
 	}
 
-	public static function cast_value_from_string($cast_type, $value, $field, $class='')
+	public function contains($name, $value)
+	{
+		if (isset(static::$config['fields'][$name]) && static::$config['fields'][$name]['type'] === 'meta-array')
+		{
+			if (isset(static::$config['fields'][$name]['cast']))
+				$value = static::cast_value_to_string(static::$config['fields'][$name]['cast'], $value, static::$config['fields'][$name]);
+			// error_log("debug contains $name: $value"); // DEBUG GETSET
+			$value_array = get_post_meta($this->post->ID, static::$config['post_type'] . '__' . $name, false);
+			return in_array($value, $value_array);
+		}
+		else
+			throw new \Exception("Attempt to contains() invalid property value '$name', to object type " . static::$config['post_type']);
+	}
+
+	/*
+	* cast the value from an integer id to a CPM of this type
+	* throws an exception if the value does not correspond to a valid CPM of this type
+	*/
+	public static function cast_validator($data, $value, $args) {
+		$obj = static::get_by_id((int)$value);
+		if ($obj === null)
+			throw new \Exception("invalid " . static::$config['post_type'] . ": $value");
+		return $obj;
+	}
+
+	/*
+	* casts an arbitrary string to a CPM of this type
+	* the string is expected to contain the id of the post
+	*/
+	public static function cast_post_from_string($value, $field=null) {
+		return static::get_by_id((int)$value);
+	}
+
+	/*
+	* casts a CPM of this type to a string containing the id of the object, or '0' if the object is null or not of this type of CPM
+	*/
+	public static function cast_post_to_string($value, $field=null) {
+		if ($value !== null && get_class($value) == get_called_class())
+			return (string)($value->id);
+		else
+			return '0';
+	}
+
+	public static function cast_value_from_string($cast_type, $value, $field)
 	{
 		if ($cast_type === 'bool')
 			return (bool)$value;
@@ -269,6 +310,8 @@ class CustomPostModel
 		elseif ($cast_type === 'float')
 			return (float)$value;
 		elseif ($cast_type === 'string')
+			return (string)$value;
+		elseif ($cast_type === 'color')
 			return (string)$value;
 		elseif ($cast_type === 'option')
 			return (string)$value;
@@ -293,6 +336,13 @@ class CustomPostModel
 			return (string)$value;
 		elseif ($cast_type === 'string')
 			return (string)$value;
+		elseif ($cast_type === 'color')
+		{
+			if (preg_match('/\A(\#[0-9a-fA-F]{3}|\#[0-9a-fA-F]{6}|\#[0-9a-fA-F]{8})\Z/', $value))
+				return (string)$value;
+			else
+				return '';
+		}
 		elseif ($cast_type === 'option')
 		{
 			if (array_key_exists((string)$value, $field['option_values']))
@@ -481,7 +531,14 @@ class CustomPostModel
 			register_post_type(static::$config['post_type'], static::$config['registration_properties']);
 		}
 
+		foreach (static::$config['fields'] as $name => $field)
+			if (isset($field['on_change']))
+				static::$manager->on_cpm_action(get_called_class(), 'changed__' . $name, $field['on_change']);
+
 		add_action('transition_post_status', array(get_called_class(), 'on_all_status_transitions'), 10, 3);
+		
+		add_filter('manage_' . static::$config['post_type'] . '_posts_columns', array(get_called_class(), 'manage_posts_columns'));
+		add_action('manage_' . static::$config['post_type'] . '_posts_custom_column', array(get_called_class(), 'manage_posts_custom_column'), 10, 2);
 	}
 
 	public static function on_all_status_transitions($new_status, $old_status, $post) {
@@ -502,6 +559,28 @@ class CustomPostModel
 			}
 
 		static::$manager->do_cpm_action(get_called_class(), 'new', array($post));
+	}
+
+	public static function manage_posts_columns($columns) {
+		if (isset(static::$config['data_columns'])) {
+			foreach (static::$config['data_columns'] as $key => $column_data) {
+				$columns[$key] = $column_data['title'];
+			}
+		}
+
+		return $columns;
+	}
+
+	public static function manage_posts_custom_column($column, $post_id) {
+		// does this belong to us?
+		if (isset(static::$config['data_columns']) && isset(static::$config['data_columns'][$column])) {
+			// get which column and post this is
+			$column_data = static::$config['data_columns'][$column];
+			$post = static::get_by_id($post_id);
+
+			// call the callback for that column
+			$column_data['callback']($post);
+		}
 	}
 }
 

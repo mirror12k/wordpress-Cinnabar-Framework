@@ -1,8 +1,10 @@
 <?php
 
-
-
 namespace Cinnabar\Mixin;
+
+
+// wordpress is doing dumb things again where get_plugin_data isn't defined even in wordpress_loaded
+require_once ABSPATH . '/wp-admin/includes/plugin.php';
 
 class UpdateTriggerManager extends \Cinnabar\BasePluginMixin
 {
@@ -11,6 +13,7 @@ class UpdateTriggerManager extends \Cinnabar\BasePluginMixin
 	// // must be defined in the main plugin class with a valid version history
 	// public $version_history = array(
 	// 	'0.0.1',
+	// 	'0.0.2',
 	// );
 
 	public $scheduled_version_update = null;
@@ -26,8 +29,9 @@ class UpdateTriggerManager extends \Cinnabar\BasePluginMixin
 				'title' => 'Cinnabar Update Trigger Manager Section',
 				'fields' => array(
 					'cinnabar-update-trigger-manager-active-plugin-version' => array(
-						'label' => 'currently active plugin version (DO NOT EDIT)',
+						'label' => 'currently active plugin version',
 						'default' => $this->app->version_history[0],
+						'option_type' => 'disabled',
 					),
 				),
 			),
@@ -36,7 +40,7 @@ class UpdateTriggerManager extends \Cinnabar\BasePluginMixin
 
 	public function wordpress_loaded()
 	{
-		if (is_admin() && function_exists('get_plugin_data'))
+		if (is_admin())
 		{
 			$this->update_update_triggers();
 		}

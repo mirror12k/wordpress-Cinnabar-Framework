@@ -185,8 +185,6 @@ class CustomUserModel
 					// error_log("debug __set $name: $value"); // DEBUG GETSET
 					add_user_meta($this->userdata->ID, static::$config['user_type'] . '__' . $name, $value, false);
 				}
-
-				return $value_array;
 			}
 			else
 				throw new \Exception("Invalid CPM field type for '$name', to user type " . static::$config['user_type']);
@@ -229,11 +227,50 @@ class CustomUserModel
 		// static::$manager->do_cpm_action(get_called_class(), 'removed__' . $name, array($this, $value));
 	}
 
+	public function contains($name, $value)
+	{
+		if (isset(static::$config['fields'][$name]) && static::$config['fields'][$name]['type'] === 'meta-array')
+		{
+			if (isset(static::$config['fields'][$name]['cast']))
+				$value = static::cast_value_to_string(static::$config['fields'][$name]['cast'], $value, static::$config['fields'][$name]);
+			// error_log("debug contains $name: $value"); // DEBUG GETSET
+			$value_array = get_user_meta($this->userdata->ID, static::$config['user_type'] . '__' . $name, false);
+			return in_array($value, $value_array);
+		}
+		else
+			throw new \Exception("Attempt to contains() invalid property value '$name', to user type " . static::$config['user_type']);
+	}
 
-			// error_log("debug add $name: $value"); // DEBUG GETSET
-			// error_log("debug remove $name: $value"); // DEBUG GETSET
+	/*
+	* cast the value from an integer id to a CSM of this type
+	* throws an exception if the value does not correspond to a valid CSM of this type
+	*/
+	public static function cast_validator($data, $value, $args) {
+		$obj = static::get_by_id((int)$value);
+		if ($obj === null)
+			throw new \Exception("invalid " . static::$config['user_type'] . ": $value");
+		return $obj;
+	}
 
-	public function cast_value_from_string($cast_type, $value, $field)
+	/*
+	* casts an arbitrary string to a CSM of this type
+	* the string is expected to contain the id of the user
+	*/
+	public static function cast_user_from_string($value, $field=null) {
+		return static::get_by_id((int)$value);
+	}
+
+	/*
+	* casts a CSM of this type to a string containing the id of the user, or '0' if the user is null or not of this type of CSM
+	*/
+	public static function cast_user_to_string($value, $field=null) {
+		if ($value !== null && get_class($value) == get_called_class())
+			return (string)($value->id);
+		else
+			return '0';
+	}
+
+	public static function cast_value_from_string($cast_type, $value, $field)
 	{
 		if ($cast_type === 'bool')
 			return (bool)$value;
@@ -242,6 +279,8 @@ class CustomUserModel
 		elseif ($cast_type === 'float')
 			return (float)$value;
 		elseif ($cast_type === 'string')
+			return (string)$value;
+		elseif ($cast_type === 'color')
 			return (string)$value;
 		elseif ($cast_type === 'option')
 			return (string)$value;
@@ -256,7 +295,7 @@ class CustomUserModel
 			throw new \Exception("Unknown cast type '$cast_type' requested, from user type " . static::$config['user_type']);
 	}
 
-	public function cast_value_to_string($cast_type, $value, $field)
+	public static function cast_value_to_string($cast_type, $value, $field)
 	{
 		if ($cast_type === 'bool')
 			return (string)$value;
@@ -266,6 +305,13 @@ class CustomUserModel
 			return (string)$value;
 		elseif ($cast_type === 'string')
 			return (string)$value;
+		elseif ($cast_type === 'color')
+		{
+			if (preg_match('/\A(\#[0-9a-fA-F]{3}|\#[0-9a-fA-F]{6}|\#[0-9a-fA-F]{8})\Z/', $value))
+				return (string)$value;
+			else
+				return '';
+		}
 		elseif ($cast_type === 'option')
 		{
 			if (array_key_exists((string)$value, $field['option_values']))
@@ -284,18 +330,49 @@ class CustomUserModel
 			throw new \Exception("Unknown cast type '$cast_type' requested, from user type " . static::$config['user_type']);
 	}
 
-	public function login_user()
-	{
+	/*
+	* checks the given password against the hashed user password
+	* returns true if password is correct
+	*/
+	public function check_password($password) {
+		return wp_check_password($password, $this->pass);
+	}
+
+	/*
+	* sets the current logged-in user to be this user
+	*/
+	public function login_user() {
 		wp_set_auth_cookie($this->id, false, is_ssl());
 	}
 
+	/*
+	* expects a valid user id
+	* casts ANY valid wordpress user to a user model of this type
+	* this allows you to wrap any user in a CSM class
+	* doesn't modify the internal custom_user_model__user_type
+	* returns null or a CSM object of this type
+	*/
+	public static function loose_cast_by_id($userid) {
+		$userdata = get_user_by('id', (int)$userid);
+		if ($userdata !== false)
+			return static::from_userdata($userdata);
+		else
+			return null;
+	}
 
-
+	/*
+	* expects a valid WP_User object
+	* returns a CSM object of this type, wrapping the wordpress userdata
+	*/
 	public static function from_userdata($userdata)
 	{
 		return new static($userdata);
 	}
 
+	/*
+	* gets the internal user type stored in the user meta
+	* this will match the $config['user_type'] property of the CSM that it was created by
+	*/
 	public static function get_user_type($userid)
 	{
 		return get_user_meta((int)$userid, 'custom_user_model__user_type', true);
