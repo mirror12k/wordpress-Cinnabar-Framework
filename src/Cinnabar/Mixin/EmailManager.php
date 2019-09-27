@@ -46,8 +46,7 @@ class EmailManager extends \Cinnabar\BasePluginMixin
 		$user = get_user_by('ID', $userid);
 		if (strlen($user->user_email) > 0)
 		{
-			wp_mail($user->user_email, $subject, $message, array("From: $from_field"));
-			return true;
+			return wp_mail($user->user_email, $subject, $message, array("From: $from_field"));
 		}
 		else
 		{
