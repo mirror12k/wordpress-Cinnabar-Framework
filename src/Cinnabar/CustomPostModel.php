@@ -578,8 +578,12 @@ class CustomPostModel
 			$column_data = static::$config['data_columns'][$column];
 			$post = static::get_by_id($post_id);
 
-			// call the callback for that column
-			$column_data['callback']($post);
+			if (isset($column_data['field']))
+				// access the field for that column
+				echo htmlspecialchars($post->{(string)$column_data['field']});
+			else
+				// call the callback for that column
+				$column_data['callback']($post);
 		}
 	}
 }
