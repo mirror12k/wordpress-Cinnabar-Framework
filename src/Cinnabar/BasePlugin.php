@@ -363,6 +363,20 @@ class BasePlugin
 		$prefix = $this->plugin_name . "__action__";
 		add_action("$prefix$action", $callback, $priority, $arg_count);
 	}
+
+	public function do_plugin_filter($filter, $args)
+	{
+		$prefix = $this->plugin_name . "__filter__";
+		$actions = array_merge(array("$prefix$filter"), $args);
+		// echo ("calling apply_filters with " . json_encode($actions));
+		return call_user_func_array('apply_filters', $actions);
+	}
+
+	public function on_plugin_filter($filter, $callback, $arg_count=1, $priority=10)
+	{
+		$prefix = $this->plugin_name . "__filter__";
+		add_filter("$prefix$filter", $callback, $priority, $arg_count);
+	}
 }
 
 
