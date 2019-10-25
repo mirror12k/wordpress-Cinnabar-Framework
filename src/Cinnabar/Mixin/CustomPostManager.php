@@ -298,6 +298,7 @@ class CustomPostManager extends \Cinnabar\BasePluginMixin
 		}
 		elseif (isset($field['cast']) && $field['cast'] === 'option')
 		{
+			$value = (string)$value;
 			?>
 			<select class='field-name-holder' <?php echo ($is_template ? '' : "name='" . htmlspecialchars($input_name) . "'"); ?>>
 				<option value="">--</option>
