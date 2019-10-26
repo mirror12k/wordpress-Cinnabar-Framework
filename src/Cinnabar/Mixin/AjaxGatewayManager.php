@@ -85,6 +85,15 @@ class AjaxGatewayManager extends \Cinnabar\BasePluginMixin
 			$data['current_user'] = wp_get_current_user()->ID;
 
 			try {
+				$this->app->do_plugin_action('check_permissions_ajax_cinnabar_action', array($action));
+			} catch (\Exception $e) {
+				$res = array(
+					'status' => 'error',
+					'error' => 'Permission Error: ' . $e->getMessage(),
+				);
+			}
+
+			try {
 				$data = $this->validate_cinnabar_action($action, $data);
 			} catch (\Exception $e) {
 				$res = array(

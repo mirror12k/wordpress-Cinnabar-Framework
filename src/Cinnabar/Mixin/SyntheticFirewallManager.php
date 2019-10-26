@@ -11,6 +11,7 @@ class SyntheticFirewallManager extends \Cinnabar\BasePluginMixin
 
 	public function load_hooks() {
 		$this->app->on_plugin_action('active_synthetic_page_selected', array($this, 'active_synthetic_page_selected'));
+		$this->app->on_plugin_action('check_permissions_ajax_cinnabar_action', array($this, 'check_permissions_ajax_cinnabar_action'));
 	}
 
 	public function register_firewall_groups($args) {
@@ -41,6 +42,21 @@ class SyntheticFirewallManager extends \Cinnabar\BasePluginMixin
 			if (isset($group['require_logged_out']) && $group['require_logged_out'])
 				if (is_user_logged_in())
 					$this->app->redirect(isset($group['else_redirect']) ? $group['else_redirect'] : '/');
+		}
+	}
+
+	public function check_permissions_ajax_cinnabar_action($key) {
+		if (isset($this->registered_synthetic_firewall_pages["ajax:$key"])) {
+			$firewall_page = $this->registered_synthetic_firewall_pages["ajax:$key"];
+			$group = $this->registered_synthetic_firewall_groups[$firewall_page];
+
+			if (isset($group['require_logged_in']) && $group['require_logged_in'])
+				if (!is_user_logged_in())
+					throw new \Exception("permission denied");
+
+			if (isset($group['require_logged_out']) && $group['require_logged_out'])
+				if (is_user_logged_in())
+					throw new \Exception("permission denied");
 		}
 	}
 }
