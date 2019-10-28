@@ -31,7 +31,7 @@ class UpdateTriggerManager extends \Cinnabar\BasePluginMixin
 					'cinnabar-update-trigger-manager-active-plugin-version' => array(
 						'label' => 'currently active plugin version',
 						'default' => $this->app->version_history[0],
-						'option_type' => 'disabled',
+						// 'option_type' => 'disabled',
 					),
 				),
 			),
