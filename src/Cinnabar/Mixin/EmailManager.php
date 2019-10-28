@@ -45,13 +45,27 @@ class EmailManager extends \Cinnabar\BasePluginMixin
 
 		$user = get_user_by('ID', $userid);
 		if (strlen($user->user_email) > 0)
-		{
 			return wp_mail($user->user_email, $subject, $message, array("From: $from_field"));
-		}
 		else
-		{
+			return false;
+	}
+
+	public function email_by_template($to_email, $template_path, $template_args)
+	{
+		$email_data = $this->render_email($template_path, $template_args);
+
+		// check global emailing flag
+		if (!$this->app->get_plugin_option('cinnabar-email-manager-enable-emailing')) {
+			error_log("[EmailManager] global emailing is disabled, email rejected");
 			return false;
 		}
+
+		$from_field = $this->app->get_plugin_option('cinnabar-email-manager-default-from-field');
+
+		if (strlen($to_email) > 0)
+			return wp_mail($to_email, $email_data['email_subject'], $email_data['email_message'], array("From: $from_field"));
+		else
+			return false;
 	}
 
 	public function render_email($template_path, $template_args)
