@@ -30,9 +30,27 @@ class SyntheticFirewallManager extends \Cinnabar\BasePluginMixin
 				$this->registered_synthetic_firewall_pages[$key] = $page;
 	}
 
+	public function get_firewall_page_for_key($key) {
+		if (isset($this->registered_synthetic_firewall_pages[$key]))
+			return $this->registered_synthetic_firewall_pages[$key];
+		else {
+			foreach ($this->registered_synthetic_firewall_pages as $index => $value) {
+				// if our index ends with a star
+				if (substr($index, -1) === "*") {
+					// check if the part before the star corresponds with the key
+					$wild_index = substr($index, 0, -1);
+					if ($wild_index === substr($key, 0, strlen($wild_index)))
+						return $value;
+				}
+			}
+		}
+
+		return null;
+	}
+
 	public function active_synthetic_page_selected($key) {
-		if (isset($this->registered_synthetic_firewall_pages[$key])) {
-			$firewall_page = $this->registered_synthetic_firewall_pages[$key];
+		$firewall_page = $this->get_firewall_page_for_key($key);
+		if ($firewall_page !== null) {
 			$group = $this->registered_synthetic_firewall_groups[$firewall_page];
 
 			if (isset($group['require_logged_in']) && $group['require_logged_in'])
@@ -46,8 +64,8 @@ class SyntheticFirewallManager extends \Cinnabar\BasePluginMixin
 	}
 
 	public function check_permissions_ajax_cinnabar_action($key) {
-		if (isset($this->registered_synthetic_firewall_pages["ajax:$key"])) {
-			$firewall_page = $this->registered_synthetic_firewall_pages["ajax:$key"];
+		$firewall_page = $this->get_firewall_page_for_key("ajax:$key");
+		if ($firewall_page !== null) {
 			$group = $this->registered_synthetic_firewall_groups[$firewall_page];
 
 			if (isset($group['require_logged_in']) && $group['require_logged_in'])
