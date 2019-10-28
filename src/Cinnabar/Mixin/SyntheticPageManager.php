@@ -196,22 +196,45 @@ class SyntheticPageManager extends \Cinnabar\BasePluginMixin
 			<?php echo htmlentities($page_location) ?>
 		</td>
 	</tr>
-	<?php if (isset($page_config['view_controller'])) { ?>
-	<tr>
-		<th><label for="view_controller" class="view_controller_label"><?php echo htmlentities(__('View Controller', 'synthetic_page')); ?></label></th>
-		<td>
-			<?php echo htmlentities($page_config['view_controller']) ?>
-		</td>
-	</tr>
+
+	<?php if (isset($page_config['redirect'])) { ?>
+		<tr>
+			<th><label for="redirect" class="redirect_label"><?php echo htmlentities(__('Redirect', 'synthetic_page')); ?></label></th>
+			<td>
+				<?php echo htmlentities($page_config['redirect']) ?>
+			</td>
+		</tr>
 	<?php } ?>
+
+	<?php if (isset($page_config['view_controller'])) { ?>
+		<tr>
+			<th><label for="view_controller" class="view_controller_label"><?php echo htmlentities(__('View Controller', 'synthetic_page')); ?></label></th>
+			<td>
+				<?php echo htmlentities($page_config['view_controller']) ?>
+			</td>
+		</tr>
+	<?php } ?>
+
 	<tr>
 		<th><label for="rewrite_rules" class="rewrite_rules_label"><?php echo htmlentities(__('Rewrite Rules', 'synthetic_page')); ?></label></th>
 	</tr>
+
 	<?php foreach ($rewrite_rules as $src => $dst) { ?>
-	<tr>
-		<th><?php echo htmlentities($src); ?></th>
-		<td><?php echo htmlentities($dst) ?></td>
-	</tr>
+		<tr>
+			<th><?php echo htmlentities($src); ?></th>
+			<td><?php echo htmlentities($dst) ?></td>
+		</tr>
+	<?php } ?>
+
+	<?php if (isset($page_config['template'])) { ?>
+		<tr>
+			<th><label for="template" class="template_label"><?php echo htmlentities(__('Template', 'synthetic_page')); ?></label></th>
+			<td>
+				<a href="<?php echo htmlspecialchars($this->app->plugin_url('/' . $page_config['template'])) ?>">
+					<?php echo htmlentities($page_config['template']) ?>
+				</a>
+			</td>
+		</tr>
 	<?php } ?>
 
 </table>
