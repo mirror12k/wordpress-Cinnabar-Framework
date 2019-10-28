@@ -54,12 +54,23 @@ class SyntheticFirewallManager extends \Cinnabar\BasePluginMixin
 			$group = $this->registered_synthetic_firewall_groups[$firewall_page];
 
 			if (isset($group['require_logged_in']) && $group['require_logged_in'])
-				if (!is_user_logged_in())
+				if (!is_user_logged_in()) {
+					error_log("user must be logged in for $key");
 					$this->app->redirect(isset($group['else_redirect']) ? $group['else_redirect'] : '/');
+				}
 
 			if (isset($group['require_logged_out']) && $group['require_logged_out'])
-				if (is_user_logged_in())
+				if (is_user_logged_in()) {
+					error_log("user must be logged out for $key");
 					$this->app->redirect(isset($group['else_redirect']) ? $group['else_redirect'] : '/');
+				}
+
+			if (isset($group['require_permissions']))
+				foreach ($group['require_permissions'] as $permission)
+					if (!user_can(get_current_user_id(), $permission)) {
+						error_log("user must have permission $permission for $key");
+						$this->app->redirect(isset($group['else_redirect']) ? $group['else_redirect'] : '/');
+					}
 		}
 	}
 
@@ -69,12 +80,23 @@ class SyntheticFirewallManager extends \Cinnabar\BasePluginMixin
 			$group = $this->registered_synthetic_firewall_groups[$firewall_page];
 
 			if (isset($group['require_logged_in']) && $group['require_logged_in'])
-				if (!is_user_logged_in())
+				if (!is_user_logged_in()) {
+					error_log("user must be logged in for $key");
 					throw new \Exception("permission denied");
+				}
 
 			if (isset($group['require_logged_out']) && $group['require_logged_out'])
-				if (is_user_logged_in())
+				if (is_user_logged_in()) {
+					error_log("user must be logged out for $key");
 					throw new \Exception("permission denied");
+				}
+
+			if (isset($group['require_permissions']))
+				foreach ($group['require_permissions'] as $permission)
+					if (!user_can(get_current_user_id(), $permission)) {
+						error_log("user must have permission $permission for $key");
+						throw new \Exception("permission denied: user lacks permission '$permission'");
+					}
 		}
 	}
 }
