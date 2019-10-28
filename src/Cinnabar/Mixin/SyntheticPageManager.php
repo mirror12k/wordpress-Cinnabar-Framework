@@ -251,19 +251,21 @@ class SyntheticPageManager extends \Cinnabar\BasePluginMixin
 	{
 		global $post;
 		// error_log("debug template_redirect_controller: " . $post->post_type);
-		if ($post->post_type === 'synthetic_page')
-		{
+		if ($post->post_type === 'synthetic_page') {
 			$location = $this->map_full_page_location($post);
 			$location = $this->app->do_plugin_filter('select_active_synthetic_page', array($location));
 			if ($location !== null) {
 				$this->active_synthetic_page = $this->registered_synthetic_pages[$location];
 				$this->app->do_plugin_action('active_synthetic_page_selected', array($location));
 
-				if (isset($this->active_synthetic_page['view_controller']))
-				{
+				if (isset($this->active_synthetic_page['view_controller'])) {
 					$this->active_view_controller = new $this->active_synthetic_page['view_controller']($this->app, $this->active_synthetic_page);
 					$this->active_view_controller->template_action();
 					$this->active_view_controller->template_redirect();
+				}
+
+				if (isset($this->active_synthetic_page['redirect'])) {
+					$this->app->redirect($this->active_synthetic_page['redirect']);
 				}
 			}
 		}
