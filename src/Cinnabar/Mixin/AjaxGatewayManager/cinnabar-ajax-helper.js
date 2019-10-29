@@ -5,17 +5,32 @@ function cinnabar_ajax_set_error_message(msg) {
 }
 
 function cinnabar_ajax_action (action, action_data, cb) {
-	console.log("cinnabar action [" + action + "] => ", JSON.stringify(action_data)); // DEBUG
+	console.log("cinnabar action [" + action + "] => ", JSON.stringify(action_data.data), action_data.form_data); // DEBUG
+
+	// var formData = new FormData();
+	var formData = action_data.form_data;
+	formData.append('action', 'cinnabar_ajax_action');
+	formData.append('cinnabar_action', action);
+	formData.append('nonce', cinnabar_ajax_config.nonce);
+	formData.append('data', JSON.stringify(action_data.data));
+
 	jQuery.ajax({
 		type : 'POST',
 		url : cinnabar_ajax_config.ajaxurl,
-		data : {
-			action : 'cinnabar_ajax_action',
-			cinnabar_action : action,
-			nonce : cinnabar_ajax_config.nonce,
-			data : action_data,
-		},
-		dataType : 'text',
+		// data : {
+		// 	action : 'cinnabar_ajax_action',
+		// 	cinnabar_action : action,
+		// 	nonce : cinnabar_ajax_config.nonce,
+		// 	data : action_data,
+		// },
+		// dataType : 'text',
+		// contentType: 'multipart/form-data',
+
+		data : formData,
+		dataType: 'text',
+		processData: false, // Don't process the files
+		contentType: false, // Set content type to false as jQuery will tell the server its a query string request
+		
 		success : function(data) {
 			var json_data;
 			console.log("cinnabar action [" + action + "] <=", JSON.stringify(data)); // DEBUG
@@ -59,24 +74,42 @@ function cinnabar_ajax_action (action, action_data, cb) {
 
 function collect_action_form_data(action_form) {
 	var data = {};
+
+	var form_data = new FormData();
+
 	jQuery(action_form).find("input,select,textarea").each(function () {
 		var input = jQuery(this);
 		var name = input.attr("name");
 		var value;
-		if (input.attr('type') === 'checkbox')
-			value = input.prop("checked");
-		else
-			value = input.attr("value");
 
-		if (name.endsWith("[]")) {
-			if (data[name.substring(0, name.length - 2)] === undefined)
-				data[name.substring(0, name.length - 2)] = [];
-			data[name.substring(0, name.length - 2)].push(value);
+		if (input.attr('type') === 'file') {
+			value = input[0].files[0];
+			form_data.append(name, value, value.name);
 		} else {
-			data[name] = value;
+			if (input.attr('type') === 'checkbox')
+				value = input.prop("checked");
+			// else if (input.attr('type') === 'file')
+			// 	value = input[0].files[0];
+			else
+				value = input.attr("value");
+
+			if (name.endsWith("[]")) {
+				name = name.substring(0, name.length - 2);
+				if (data[name] === undefined)
+					data[name] = [];
+				data[name].push(value);
+			} else {
+				data[name] = value;
+			}
 		}
 	});
-	return data;
+
+	console.log("data:", data);
+
+	return {
+		form_data: form_data,
+		data: data,
+	};
 }
 
 var cinnabar_action_hooks = {};

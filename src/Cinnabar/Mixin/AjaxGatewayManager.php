@@ -81,7 +81,7 @@ class AjaxGatewayManager extends \Cinnabar\BasePluginMixin
 		else
 		{
 			$action = (string)$_POST['cinnabar_action'];
-			$data = $_POST['data'];
+			$data = json_decode(stripslashes($_POST['data']), true);
 			$data['current_user'] = wp_get_current_user()->ID;
 
 			try {
@@ -176,7 +176,7 @@ class AjaxGatewayManager extends \Cinnabar\BasePluginMixin
 
 	public static function parse_json($data, $value, $args)
 	{
-		return json_decode(stripslashes($value), true);
+		return json_decode($value, true);
 	}
 }
 
