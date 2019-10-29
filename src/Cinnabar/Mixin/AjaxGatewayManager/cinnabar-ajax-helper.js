@@ -59,20 +59,22 @@ function cinnabar_ajax_action (action, action_data, cb) {
 
 function collect_action_form_data(action_form) {
 	var data = {};
-	jQuery(action_form).find("input").each(function () {
+	jQuery(action_form).find("input,select,textarea").each(function () {
 		var input = jQuery(this);
+		var name = input.attr("name");
+		var value;
 		if (input.attr('type') === 'checkbox')
-			data[input.attr("name")] = input.prop("checked");
+			value = input.prop("checked");
 		else
-			data[input.attr("name")] = input.attr("value");
-	});
-	jQuery(action_form).find("select").each(function () {
-		var input = jQuery(this);
-		data[input.attr("name")] = input.attr("value");
-	});
-	jQuery(action_form).find("textarea").each(function () {
-		var input = jQuery(this);
-		data[input.attr("name")] = input.attr("value");
+			value = input.attr("value");
+
+		if (name.endsWith("[]")) {
+			if (data[name.substring(0, name.length - 2)] === undefined)
+				data[name.substring(0, name.length - 2)] = [];
+			data[name.substring(0, name.length - 2)].push(value);
+		} else {
+			data[name] = value;
+		}
 	});
 	return data;
 }
