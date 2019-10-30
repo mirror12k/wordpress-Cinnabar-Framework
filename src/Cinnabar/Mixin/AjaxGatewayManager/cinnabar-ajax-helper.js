@@ -82,24 +82,27 @@ function collect_action_form_data(action_form) {
 		var name = input.attr("name");
 		var value;
 
-		if (input.attr('type') === 'file') {
-			value = input[0].files[0];
-			form_data.append(name, value, value.name);
-		} else {
-			if (input.attr('type') === 'checkbox')
-				value = input.prop("checked");
-			// else if (input.attr('type') === 'file')
-			// 	value = input[0].files[0];
-			else
-				value = input.attr("value");
-
-			if (name.endsWith("[]")) {
-				name = name.substring(0, name.length - 2);
-				if (data[name] === undefined)
-					data[name] = [];
-				data[name].push(value);
+		if (name !== undefined) {
+			if (input.attr('type') === 'file') {
+				value = input[0].files[0];
+				if (value !== undefined)
+					form_data.append(name, value, value.name);
 			} else {
-				data[name] = value;
+				if (input.attr('type') === 'checkbox')
+					value = input.prop("checked");
+				// else if (input.attr('type') === 'file')
+				// 	value = input[0].files[0];
+				else
+					value = input.attr("value");
+
+				if (name.endsWith("[]")) {
+					name = name.substring(0, name.length - 2);
+					if (data[name] === undefined)
+						data[name] = [];
+					data[name].push(value);
+				} else {
+					data[name] = value;
+				}
 			}
 		}
 	});
