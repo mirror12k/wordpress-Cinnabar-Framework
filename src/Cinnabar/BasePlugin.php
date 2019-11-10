@@ -25,6 +25,8 @@ class BasePlugin
 
 	public $admin_menu_bar_items = array();
 
+	public $is_activating = false;
+
 
 	// entry point, must be called at the start of the plugin to load the application functionality
 	public function load_plugin()
@@ -103,7 +105,7 @@ class BasePlugin
 		add_action('init', array($this, 'load_plugin_options'));
 
 		// standard utility hooks
-		register_activation_hook(plugin_basename($this->plugin_dir('/' . $this->plugin_name . '.php')), array($this, 'wordpress_activate'));
+		register_activation_hook(plugin_basename($this->plugin_dir('/' . $this->plugin_name . '.php')), array($this, 'baseplugin_wordpress_activate'));
 		add_action('init', array($this, 'wordpress_init'));
 		add_action('admin_init', array($this, 'wordpress_admin_init'));
 		add_action('admin_menu', array($this, 'wordpress_admin_menu'));
@@ -288,6 +290,14 @@ class BasePlugin
 	{
 		foreach ($this->mixins as $class => $mixin)
 			$mixin->wordpress_loaded();
+	}
+
+	public function baseplugin_wordpress_activate()
+	{
+		$is_activating = true;
+		$this->register();
+		$this->mixins_register();
+		$this->wordpress_activate();
 	}
 
 	// overridable api
