@@ -529,6 +529,7 @@ class SyntheticPageManager extends \Cinnabar\BasePluginMixin
 
 	public function render_template($template_path, $template_args)
 	{
+		$template_args = array_merge($template_args, array( 'app' => $this->app ));
 		return $this->twig->render($template_path, $template_args);
 	}
 }
