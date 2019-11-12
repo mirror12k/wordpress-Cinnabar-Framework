@@ -25,6 +25,11 @@ class AjaxGatewayManager extends \Cinnabar\BasePluginMixin
 			'cast_bool' => array('Cinnabar\\Mixin\\AjaxGatewayManager', 'cast_bool'),
 			'cast_int' => array('Cinnabar\\Mixin\\AjaxGatewayManager', 'cast_int'),
 			'cast_string' => array('Cinnabar\\Mixin\\AjaxGatewayManager', 'cast_string'),
+			'string_regex_validator' => array('Cinnabar\\Mixin\\AjaxGatewayManager', 'string_regex_validator'),
+			'cast_bool_array' => array('Cinnabar\\Mixin\\AjaxGatewayManager', 'cast_bool_array'),
+			'cast_int_array' => array('Cinnabar\\Mixin\\AjaxGatewayManager', 'cast_int_array'),
+			'cast_string_array' => array('Cinnabar\\Mixin\\AjaxGatewayManager', 'cast_string_array'),
+			'cast_array' => array('Cinnabar\\Mixin\\AjaxGatewayManager', 'cast_array'),
 			'parse_json' => array('Cinnabar\\Mixin\\AjaxGatewayManager', 'parse_json'),
 		));
 	}
@@ -172,6 +177,34 @@ class AjaxGatewayManager extends \Cinnabar\BasePluginMixin
 	public static function cast_string($data, $value, $args)
 	{
 		return (string)$value;
+	}
+
+	public static function string_regex_validator($data, $value, $args)
+	{
+		$value = (string)$value;
+		if (preg_match($args['regex'], $value) !== 1)
+			throw new \Exception(isset($args['error']) ? $args['error'] : "invalid value");
+		return $value;
+	}
+
+	public static function cast_bool_array($data, $value, $args)
+	{
+		return is_array($value) ? array_map(function($v) { return (bool)$v; }, $value) : array();
+	}
+
+	public static function cast_int_array($data, $value, $args)
+	{
+		return is_array($value) ? array_map(function($v) { return (int)$v; }, $value) : array();
+	}
+
+	public static function cast_string_array($data, $value, $args)
+	{
+		return is_array($value) ? array_map(function($v) { return (string)$v; }, $value) : array();
+	}
+
+	public static function cast_array($data, $value, $args)
+	{
+		return is_array($value) ? $value : array();
 	}
 
 	public static function parse_json($data, $value, $args)
