@@ -278,19 +278,24 @@ class SyntheticPageManager extends \Cinnabar\BasePluginMixin
 			$location = $this->map_full_page_location($post);
 			$location = $this->app->do_plugin_filter('select_active_synthetic_page', array($location));
 			if ($location !== null) {
-				$this->active_synthetic_page = $this->registered_synthetic_pages[$location];
-				$this->app->do_plugin_action('active_synthetic_page_selected', array($location));
-
-				if (isset($this->active_synthetic_page['view_controller'])) {
-					$this->active_view_controller = new $this->active_synthetic_page['view_controller']($this->app, $this->active_synthetic_page);
-					$this->active_view_controller->template_action();
-					$this->active_view_controller->template_redirect();
-				}
-
-				if (isset($this->active_synthetic_page['redirect'])) {
-					$this->app->redirect($this->active_synthetic_page['redirect']);
-				}
+				$this->select_synthetic_page($location);
 			}
+		}
+	}
+
+	public function select_synthetic_page($location)
+	{
+		$this->active_synthetic_page = $this->registered_synthetic_pages[$location];
+		$this->app->do_plugin_action('active_synthetic_page_selected', array($location));
+
+		if (isset($this->active_synthetic_page['view_controller'])) {
+			$this->active_view_controller = new $this->active_synthetic_page['view_controller']($this->app, $this->active_synthetic_page);
+			$this->active_view_controller->template_action();
+			$this->active_view_controller->template_redirect();
+		}
+
+		if (isset($this->active_synthetic_page['redirect'])) {
+			$this->app->redirect($this->active_synthetic_page['redirect']);
 		}
 	}
 
