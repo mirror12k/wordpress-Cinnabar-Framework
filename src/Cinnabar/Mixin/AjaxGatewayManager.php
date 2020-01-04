@@ -73,7 +73,7 @@ class AjaxGatewayManager extends \Cinnabar\BasePluginMixin
 	public function cinnabar_action_gateway()
 	{
 		// error_log("debug start cinnabar ajax"); // DEBUG AJAX
-		if (wp_verify_nonce((string)$_POST['nonce'], 'cinnabar-ajax-nonce') === false)
+		if (!$this->is_no_nonce_action((string)$_POST['cinnabar_action']) && wp_verify_nonce((string)$_POST['nonce'], 'cinnabar-ajax-nonce') === false)
 			$res = array(
 				'status' => 'error',
 				'error' => 'invalid nonce: please refresh the page',
@@ -114,9 +114,14 @@ class AjaxGatewayManager extends \Cinnabar\BasePluginMixin
 		exit;
 	}
 
-	public function is_valid_action($action)
-	{
+	public function is_valid_action($action) {
 		return isset($this->registered_ajax_actions[$action]);
+	}
+
+	public function is_no_nonce_action($action) {
+		return isset($this->registered_ajax_actions[$action])
+			&& isset($this->registered_ajax_actions[$action]['no_nonce'])
+			&& $this->registered_ajax_actions[$action]['no_nonce'] === true;
 	}
 
 	public function validate_cinnabar_action($action, $data)
