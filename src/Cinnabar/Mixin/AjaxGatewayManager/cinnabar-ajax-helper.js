@@ -93,7 +93,7 @@ function collect_action_form_data(action_form) {
 				// else if (input.attr('type') === 'file')
 				// 	value = input[0].files[0];
 				else
-					value = input.attr("value");
+					value = input.val();
 
 				if (name.endsWith("[]")) {
 					name = name.substring(0, name.length - 2);

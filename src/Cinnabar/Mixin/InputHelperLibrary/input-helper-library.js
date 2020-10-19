@@ -48,7 +48,7 @@ jQuery(function ($) {
 			var container = $(this);
 			var dynamic_input_name = container.data('dynamic-input-name');
 			container.find('.dynamic-input-search').on('input', function () {
-				var query = $(this).attr("value");
+				var query = $(this).val();
 				container.find('.dynamic-input-search-results').empty();
 
 				if (query !== '') {
@@ -94,7 +94,7 @@ jQuery(function ($) {
 				e.preventDefault();
 				e.stopPropagation();
 
-				window.location = '/wp-admin/post.php?post=' + container.find('.dynamic-input-field').attr('value') + '&action=edit';
+				window.location = '/wp-admin/post.php?post=' + container.find('.dynamic-input-field').val() + '&action=edit';
 			});
 		});
 	}
