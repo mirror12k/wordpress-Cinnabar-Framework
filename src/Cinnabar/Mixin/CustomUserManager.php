@@ -98,7 +98,7 @@ class CustomUserManager extends \Cinnabar\BasePluginMixin
 					
 					// stripslashes because wordpress is stupid and adds magic quotes back in
 					if (is_array($value)) {
-						$value = array_map(stripslashes, $value);
+						$value = array_map('stripslashes', $value);
 					} else {
 						$value = stripslashes($value);
 					}
